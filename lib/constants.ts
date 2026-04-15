@@ -32,42 +32,42 @@ export const TIER_THRESHOLDS: Record<EstimateTier, [number, number]> = {
 };
 
 export const TIER_DESCRIPTIONS: Record<EstimateTier, string> = {
-  Starter: "Focused rebuilds for lean MVPs and clear, low-complexity scopes.",
-  Growth: "A strong fit for established products with several core workflows to rebuild.",
-  Scale: "Best for multi-role platforms with integrations, internal tooling, and deeper UX work.",
+  Starter: "A focused rebuild for a small, straightforward app.",
+  Growth: "A good fit for an established app with a few core workflows.",
+  Scale: "For bigger apps with multiple user types, integrations, and more UI work.",
   Enterprise:
-    "Reserved for mission-critical rebuilds with serious architecture, migration, and delivery overhead.",
+    "For large, business-critical rebuilds with heavy architecture and migration work.",
 };
 
 export const STEP_TITLES = [
-  "App Size",
-  "User Roles",
-  "Rebuild Type",
+  "Size",
+  "Users",
+  "Rebuild",
   "Features",
   "Integrations",
-  "UI & Devices",
-  "Existing Designs",
-  "Admin Dashboard",
-  "Migration & Tech Debt",
-  "Delivery Add-ons",
+  "Look and feel",
+  "Designs",
+  "Admin",
+  "Data and docs",
+  "Extras",
 ] as const;
 
 export const APP_SIZE_HOURS: Record<AppSizeOption, number> = {
-  mvp: 120,
-  mid: 320,
-  large: 600,
+  mvp: 72,
+  mid: 192,
+  large: 360,
 };
 
 export const USER_ROLE_HOURS: Record<UserRolesOption, number> = {
   one: 0,
-  twoToThree: 40,
-  fourPlus: 80,
+  twoToThree: 24,
+  fourPlus: 48,
 };
 
 export const USER_ROLE_PERMISSION_HOURS: Record<UserRolesOption, number> = {
-  one: 8,
-  twoToThree: 24,
-  fourPlus: 56,
+  one: 5,
+  twoToThree: 14,
+  fourPlus: 34,
 };
 
 export const REBUILD_TYPE_MULTIPLIERS: Record<RebuildTypeOption, number> = {
@@ -78,9 +78,9 @@ export const REBUILD_TYPE_MULTIPLIERS: Record<RebuildTypeOption, number> = {
 };
 
 export const FEATURE_HOURS = {
-  simple: 8,
-  medium: 24,
-  complex: 56,
+  simple: 5,
+  medium: 14,
+  complex: 34,
 } as const;
 
 export const UI_QUALITY_MULTIPLIERS: Record<UIQualityOption, number> = {
@@ -91,8 +91,8 @@ export const UI_QUALITY_MULTIPLIERS: Record<UIQualityOption, number> = {
 
 export const UI_QUALITY_DESIGN_SYSTEM_HOURS: Record<UIQualityOption, number> = {
   basic: 0,
-  polished: 24,
-  premium: 60,
+  polished: 14,
+  premium: 36,
 };
 
 export const DEVICE_SUPPORT_MULTIPLIERS: Record<DeviceSupportOption, number> = {
@@ -110,31 +110,31 @@ export const EXISTING_DESIGN_MULTIPLIERS: Record<ExistingDesignsOption, number> 
 export const EXISTING_DESIGN_EXTRA_HOURS: Record<ExistingDesignsOption, number> = {
   ready: 0,
   partial: 0,
-  none: 40,
+  none: 24,
 };
 
 export const ADMIN_HOURS: Record<AdminDashboardOption, number> = {
   none: 0,
-  basic: 40,
-  advanced: 100,
+  basic: 24,
+  advanced: 60,
 };
 
 export const ADMIN_REPORTING_HOURS: Record<AdminDashboardOption, number> = {
   none: 0,
-  basic: 16,
-  advanced: 48,
+  basic: 10,
+  advanced: 29,
 };
 
 export const DATA_MIGRATION_HOURS: Record<DataMigrationOption, number> = {
   none: 0,
-  simple: 24,
-  complex: 80,
+  simple: 14,
+  complex: 48,
 };
 
 export const TECH_DEBT_HOURS: Record<TechDebtOption, number> = {
   none: 0,
-  some: 40,
-  major: 100,
+  some: 24,
+  major: 60,
 };
 
 export const DOCUMENTATION_MULTIPLIERS: Record<DocumentationOption, number> = {
@@ -143,7 +143,7 @@ export const DOCUMENTATION_MULTIPLIERS: Record<DocumentationOption, number> = {
   none: 1.15,
 };
 
-export const DESIGN_PHASE_HOURS = 80;
+export const DESIGN_PHASE_HOURS = 48;
 
 export const QA_MULTIPLIERS: Record<QaLevelOption, number> = {
   none: 1,

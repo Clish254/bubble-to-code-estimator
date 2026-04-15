@@ -13,8 +13,7 @@ function StepAdmin({ value, onChange }: StepAdminProps) {
     <StepShell
       eyebrow="Step 8"
       title="Do you need an admin dashboard?"
-      description="Internal tooling and reporting can add meaningful scope, especially once a product needs moderation, support operations, or exports."
-      aside="This answer also auto-maps the hidden reporting overhead: None 0 hrs, Basic 16 hrs, Advanced 48 hrs."
+      description="A private area for your team to manage users, content, or reports."
     >
       <RadioGroup
         value={value ?? ""}
@@ -23,25 +22,20 @@ function StepAdmin({ value, onChange }: StepAdminProps) {
       >
         <RadioOption
           value="none"
-          title="No admin dashboard"
-          description="The coded rebuild can stay focused on the customer-facing product only."
-          badge="+0 hrs"
+          title="No, we don't need one"
+          description="The app is for customers only."
           checked={value === "none"}
         />
         <RadioOption
           value="basic"
           title="Basic admin"
-          description="A lighter internal surface for user lists, metrics, and straightforward exports."
-          badge="+40 hrs"
-          meta="Includes hidden reporting time for basic exports."
+          description="User lists, quick metrics, and simple exports."
           checked={value === "basic"}
         />
         <RadioOption
           value="advanced"
           title="Advanced admin"
-          description="A broader internal back office with moderation, overrides, CMS behavior, or heavier operations flows."
-          badge="+100 hrs"
-          meta="Includes hidden reporting time for advanced reporting."
+          description="Moderation, reports, and more powerful back-office tools."
           checked={value === "advanced"}
         />
       </RadioGroup>

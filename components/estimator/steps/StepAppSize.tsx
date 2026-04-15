@@ -12,25 +12,21 @@ const OPTIONS: Array<{
   value: AppSizeOption;
   title: string;
   description: string;
-  badge: string;
 }> = [
   {
     value: "mvp",
-    title: "MVP",
-    description: "A focused product with 3 to 5 core screens and a tighter rebuild scope.",
-    badge: "120 hrs",
+    title: "Small",
+    description: "3–5 main screens. An MVP or a focused product.",
   },
   {
     value: "mid",
-    title: "Mid-sized app",
-    description: "A product with 6 to 15 screens, multiple flows, and a typical SaaS footprint.",
-    badge: "320 hrs",
+    title: "Medium",
+    description: "6–15 screens with a few connected flows.",
   },
   {
     value: "large",
-    title: "Large platform",
-    description: "A 16 to 30+ screen product with broader internal tooling and deeper system needs.",
-    badge: "600 hrs",
+    title: "Large",
+    description: "16+ screens, multiple user types, bigger product.",
   },
 ];
 
@@ -38,9 +34,9 @@ function StepAppSize({ value, onChange }: StepAppSizeProps) {
   return (
     <StepShell
       eyebrow="Step 1"
-      title="How big is your Bubble app?"
-      description="Choose the option that best reflects the product you have today, not the roadmap you hope to add later."
-      aside="Screen count is the strongest single scope signal in the model, so it anchors the rest of the estimate."
+      title="How big is your app?"
+      description="Pick the closest match to the product you have today."
+      aside="Not sure where you land? Go with your gut. We can refine it on a call."
     >
       <RadioGroup
         value={value ?? ""}
@@ -53,7 +49,6 @@ function StepAppSize({ value, onChange }: StepAppSizeProps) {
             value={option.value}
             title={option.title}
             description={option.description}
-            badge={option.badge}
             checked={value === option.value}
           />
         ))}

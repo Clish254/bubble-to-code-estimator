@@ -75,7 +75,7 @@ describe("POST /api/classify-integrations", () => {
       {
         name: "Stripe",
         complexity: "low",
-        hours: 12,
+        hours: 7,
         reason: "Matches the Stripe payment reference.",
         source: "ai",
       },
@@ -91,7 +91,7 @@ describe("POST /api/classify-integrations", () => {
     expect(response.status).toBe(200);
     expect(payload.classifications).toHaveLength(2);
     expect(payload.classifications[0].complexity).toBe("medium");
-    expect(payload.classifications[0].hours).toBe(32);
+    expect(payload.classifications[0].hours).toBe(19);
   });
 
   it("rate limits repeated requests and still returns fallback classifications", async () => {

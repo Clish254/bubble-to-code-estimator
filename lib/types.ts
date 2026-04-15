@@ -25,10 +25,20 @@ export interface IntegrationClassification {
   source?: "ai" | "fallback" | "manual";
 }
 
+export interface FeatureClassification {
+  simple: number;
+  medium: number;
+  complex: number;
+  summary: string;
+  source: "ai" | "fallback";
+}
+
 export interface EstimatorAnswers {
   appSize: AppSizeOption | null;
   userRoles: UserRolesOption | null;
   rebuildType: RebuildTypeOption | null;
+  featuresText: string;
+  featureClassification: FeatureClassification | null;
   simpleFeatureCount: number;
   mediumFeatureCount: number;
   complexFeatureCount: number;
@@ -113,6 +123,11 @@ export interface ClassificationResponse {
   message?: string;
 }
 
+export interface FeatureClassificationResponse {
+  classification: FeatureClassification | null;
+  message?: string;
+}
+
 export interface EstimatorState {
   currentStep: number;
   direction: 1 | -1;
@@ -120,4 +135,7 @@ export interface EstimatorState {
   integrationStatus: "idle" | "loading" | "ready" | "error";
   integrationMessage: string | null;
   lastClassifiedText: string;
+  featureStatus: "idle" | "loading" | "ready" | "error";
+  featureMessage: string | null;
+  lastClassifiedFeaturesText: string;
 }

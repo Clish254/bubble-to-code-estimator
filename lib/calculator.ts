@@ -167,9 +167,9 @@ export function calculateEstimate(input: EstimateInput): EstimateResult {
 
   const breakdown: BreakdownGroup[] = [
     {
-      title: "Scope and foundations",
-      subtotalLabel: "Direct hours",
-      subtotalValue: formatHours(
+      title: "The basics",
+      subtotalLabel: "Days",
+      subtotalValue: formatDays(
         APP_SIZE_HOURS[input.appSize] +
           USER_ROLE_HOURS[input.userRoles] +
           permissionsHours +
@@ -178,61 +178,47 @@ export function calculateEstimate(input: EstimateInput): EstimateResult {
       items: [
         {
           label: "App size",
-          value: formatHours(APP_SIZE_HOURS[input.appSize]),
+          value: formatDays(APP_SIZE_HOURS[input.appSize]),
         },
         {
-          label: "User roles",
-          value: formatHours(USER_ROLE_HOURS[input.userRoles]),
+          label: "User types",
+          value: formatDays(USER_ROLE_HOURS[input.userRoles]),
         },
         {
-          label: "Permissions complexity",
-          value: formatHours(permissionsHours),
+          label: "Permissions",
+          value: formatDays(permissionsHours),
         },
         {
-          label: "Design system depth",
-          value: formatHours(designSystemHours),
+          label: "Design system",
+          value: formatDays(designSystemHours),
         },
       ],
     },
     {
       title: "Features and integrations",
-      subtotalLabel: "Direct hours",
-      subtotalValue: formatHours(featureHours + integrationHours),
+      subtotalLabel: "Days",
+      subtotalValue: formatDays(featureHours + integrationHours),
       items: [
         {
-          label: "Simple features",
-          value: `${input.featureCounts.simple} × ${FEATURE_HOURS.simple}h = ${formatHours(
-            input.featureCounts.simple * FEATURE_HOURS.simple
-          )}`,
-        },
-        {
-          label: "Medium features",
-          value: `${input.featureCounts.medium} × ${FEATURE_HOURS.medium}h = ${formatHours(
-            input.featureCounts.medium * FEATURE_HOURS.medium
-          )}`,
-        },
-        {
-          label: "Complex features",
-          value: `${input.featureCounts.complex} × ${FEATURE_HOURS.complex}h = ${formatHours(
-            input.featureCounts.complex * FEATURE_HOURS.complex
-          )}`,
+          label: "Features",
+          value: formatDays(featureHours),
         },
         {
           label: "Integrations",
           value: input.integrations.length
-            ? formatHours(integrationHours)
-            : "No integrations included",
+            ? formatDays(integrationHours)
+            : "None",
         },
         ...input.integrations.map((integration) => ({
           label: integration.name,
-          value: `${integration.complexity} • ${formatHours(integration.hours)}`,
+          value: formatDays(integration.hours),
         })),
       ],
     },
     {
-      title: "Design, admin, and rebuild work",
-      subtotalLabel: "Direct hours",
-      subtotalValue: formatHours(
+      title: "Design, admin, and data work",
+      subtotalLabel: "Days",
+      subtotalValue: formatDays(
         noDesignHours +
           adminHours +
           reportingHours +
@@ -242,48 +228,48 @@ export function calculateEstimate(input: EstimateInput): EstimateResult {
       ),
       items: [
         {
-          label: "No-design lift",
-          value: formatHours(noDesignHours),
+          label: "Design effort",
+          value: formatDays(noDesignHours),
         },
         {
           label: "Admin dashboard",
-          value: formatHours(adminHours),
+          value: formatDays(adminHours),
         },
         {
-          label: "Reporting and exports",
-          value: formatHours(reportingHours),
+          label: "Reports and exports",
+          value: formatDays(reportingHours),
         },
         {
           label: "Data migration",
-          value: formatHours(migrationHours),
+          value: formatDays(migrationHours),
         },
         {
-          label: "Tech debt and architecture",
-          value: formatHours(techDebtHours),
+          label: "Cleanup work",
+          value: formatDays(techDebtHours),
         },
         {
           label: "Design phase",
-          value: formatHours(designPhaseHours),
+          value: formatDays(designPhaseHours),
         },
       ],
     },
     {
-      title: "Multipliers and contingency",
-      subtotalLabel: "Buffered total",
-      subtotalValue: formatHours(bufferedHours),
+      title: "Adjustments and buffer",
+      subtotalLabel: "Days in total",
+      subtotalValue: formatDays(bufferedHours),
       items: [
         ...multiplierMap.map(([label, multiplier]) => ({
           label,
           value: `×${multiplier.toFixed(2)}`,
         })),
         {
-          label: "Combined multiplier",
+          label: "Combined adjustment",
           value: `×${combinedMultiplier.toFixed(2)}`,
           emphasis: true,
         },
         {
           label: "Buffer",
-          value: formatHours(bufferHours),
+          value: formatDays(bufferHours),
         },
       ],
     },
@@ -308,8 +294,36 @@ export function calculateEstimate(input: EstimateInput): EstimateResult {
   };
 }
 
-export function formatHours(hours: number): string {
-  return `${trimNumber(hours)} hrs`;
+const HOURS_PER_DAY = 8;
+const DAYS_PER_WEEK = 4;
+const DAYS_PER_MONTH = 20;
+
+export function formatDays(hours: number): string {
+  const days = Math.ceil(hours / HOURS_PER_DAY);
+  return `${days} ${days === 1 ? "day" : "days"}`;
+}
+
+export function hoursToDays(hours: number): number {
+  return Math.ceil(hours / HOURS_PER_DAY);
+}
+
+export function weeksToDays(weeks: number): number {
+  return Math.ceil(weeks * DAYS_PER_WEEK);
+}
+
+export function formatTimeline(daysLow: number, daysHigh: number): string {
+  if (daysHigh <= DAYS_PER_MONTH) {
+    if (daysLow === daysHigh) {
+      return `${daysHigh} ${daysHigh === 1 ? "day" : "days"}`;
+    }
+    return `${daysLow}–${daysHigh} days`;
+  }
+  const monthsLow = Math.ceil(daysLow / DAYS_PER_MONTH);
+  const monthsHigh = Math.ceil(daysHigh / DAYS_PER_MONTH);
+  if (monthsLow === monthsHigh) {
+    return `${monthsHigh} ${monthsHigh === 1 ? "month" : "months"}`;
+  }
+  return `${monthsLow}–${monthsHigh} months`;
 }
 
 function getTier(costMid: number): EstimateTier {
@@ -337,9 +351,4 @@ function sumIntegrationHours(integrations: IntegrationClassification[]): number 
     const hours = INTEGRATION_HOURS[integration.complexity] ?? integration.hours ?? 0;
     return accumulator + hours;
   }, 0);
-}
-
-function trimNumber(value: number): string {
-  const rounded = Math.round(value * 100) / 100;
-  return Number.isInteger(rounded) ? `${rounded}` : rounded.toFixed(2);
 }

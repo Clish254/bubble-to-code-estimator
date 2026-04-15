@@ -1,4 +1,4 @@
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -18,14 +18,14 @@ describe("EstimatorWizard", () => {
     const nextButton = screen.getByRole("button", { name: "Next" });
     expect(nextButton).toBeDisabled();
 
-    await user.click(screen.getByRole("radio", { name: /Mid-sized app/i }));
+    await user.click(screen.getByRole("radio", { name: /^Medium/i }));
 
     expect(nextButton).toBeEnabled();
 
     await user.click(getActionButton("Next"));
 
     expect(await screen.findByRole("heading", {
-      name: /How many user roles does your app have/i,
+      name: /How many types of users/i,
     })).toBeInTheDocument();
   });
 
@@ -35,7 +35,7 @@ describe("EstimatorWizard", () => {
 
     render(<EstimatorWizard />);
 
-    await user.click(screen.getByRole("radio", { name: /Mid-sized app/i }));
+    await user.click(screen.getByRole("radio", { name: /^Medium/i }));
 
     expect(consoleError).not.toHaveBeenCalledWith(
       expect.stringContaining(
@@ -44,15 +44,33 @@ describe("EstimatorWizard", () => {
     );
   });
 
-  it("shows the integration loading state and allows manual classification changes", async () => {
+  it("shows the integration loading state while classifying", async () => {
     const user = userEvent.setup();
     let resolveFetch: (value: Response) => void = () => undefined;
 
     vi.mocked(fetch).mockImplementation(
-      () =>
-        new Promise((resolve) => {
-          resolveFetch = resolve as (value: Response) => void;
-        }) as Promise<Response>
+      (input: RequestInfo | URL) => {
+        const url = typeof input === "string" ? input : input.toString();
+        if (url.includes("classify-features")) {
+          return Promise.resolve(
+            new Response(
+              JSON.stringify({
+                classification: {
+                  simple: 3,
+                  medium: 2,
+                  complex: 1,
+                  summary: "A balanced mix of features.",
+                  source: "ai",
+                },
+              }),
+              { status: 200, headers: { "Content-Type": "application/json" } }
+            )
+          ) as Promise<Response>;
+        }
+        return new Promise<Response>((resolve) => {
+          resolveFetch = resolve;
+        });
+      }
     );
 
     render(<EstimatorWizard />);
@@ -63,7 +81,7 @@ describe("EstimatorWizard", () => {
     await user.click(getActionButton("Analyze Integrations"));
 
     expect(await screen.findByRole("heading", {
-      name: /Analyzing your integrations/i,
+      name: /Checking your integrations/i,
     })).toBeInTheDocument();
 
     resolveFetch(
@@ -73,29 +91,37 @@ describe("EstimatorWizard", () => {
             {
               name: "Stripe",
               complexity: "low",
-              hours: 12,
+              hours: 7,
               reason: "Matches the Stripe payment reference.",
             },
           ],
         }),
-        {
-          status: 200,
-          headers: { "Content-Type": "application/json" },
-        }
+        { status: 200, headers: { "Content-Type": "application/json" } }
       )
     );
 
-    const stripePanel = await screen.findByTestId("integration-Stripe");
-
-    await user.click(within(stripePanel).getByRole("button", { name: "High" }));
-
-    await waitFor(() =>
-      expect(screen.getByText(/64\s*hrs/i)).toBeInTheDocument()
-    );
+    await screen.findByTestId("integration-Stripe");
   });
 
   it("keeps focus in the integrations textarea while typing", async () => {
     const user = userEvent.setup();
+
+    vi.mocked(fetch).mockImplementation(() =>
+      Promise.resolve(
+        new Response(
+          JSON.stringify({
+            classification: {
+              simple: 3,
+              medium: 2,
+              complex: 1,
+              summary: "Ok.",
+              source: "ai",
+            },
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } }
+        )
+      )
+    );
 
     render(<EstimatorWizard />);
 
@@ -113,34 +139,57 @@ describe("EstimatorWizard", () => {
   it("completes the golden path and renders the final estimate", async () => {
     const user = userEvent.setup();
 
-    vi.mocked(fetch).mockResolvedValue(
-      new Response(
-        JSON.stringify({
-          classifications: [
-            {
-              name: "Stripe",
-              complexity: "low",
-              hours: 12,
-              reason: "Matches the Stripe payment reference.",
-            },
-          ],
-        }),
-        {
-          status: 200,
-          headers: { "Content-Type": "application/json" },
-        }
-      )
-    );
+    vi.mocked(fetch).mockImplementation((input: RequestInfo | URL) => {
+      const url = typeof input === "string" ? input : input.toString();
+      if (url.includes("classify-features")) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              classification: {
+                simple: 3,
+                medium: 2,
+                complex: 1,
+                summary: "A balanced feature set.",
+                source: "ai",
+              },
+            }),
+            { status: 200, headers: { "Content-Type": "application/json" } }
+          )
+        );
+      }
+      return Promise.resolve(
+        new Response(
+          JSON.stringify({
+            classifications: [
+              {
+                name: "Stripe",
+                complexity: "low",
+                hours: 12,
+                reason: "Matches the Stripe payment reference.",
+              },
+            ],
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } }
+        )
+      );
+    });
 
     render(<EstimatorWizard />);
 
     await completeGoldenFlow(user);
 
+    // sameUx (×0.8), mid app, twoToThree roles, 3/2/1 features, Stripe low,
+    // polished + desktopMobile, partial designs, basic admin, no migration,
+    // no techDebt, partial docs, no extras.
+    // directHours = 362, combined = 0.8, buffered = 347.52
+    // costMid = $27,801.60 → low $23,631.36, high $33,361.92
+    // Rounded up to $1k: $24,000 – $34,000
+    // totalWeeks = 12.86 → daysLow 44, daysHigh 62 → 3–4 months
+    // Tier: Growth (costMid falls in 14.4k–36k)
     expect(
-      await screen.findByRole("heading", { name: /\$49,300 - \$69,600/i })
+      await screen.findByRole("heading", { name: /\$24,000\s*–\s*\$34,000/i })
     ).toBeInTheDocument();
-    expect(screen.getByText(/4\.8 - 6\.8 months/i)).toBeInTheDocument();
-    expect(screen.getByText("Scale")).toBeInTheDocument();
+    expect(screen.getByText(/3[–-]4 months/i)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /Book a Call/i })).toHaveAttribute(
       "href",
       "https://goodspeed.studio/contact"
@@ -149,37 +198,109 @@ describe("EstimatorWizard", () => {
     await user.click(screen.getByRole("button", { name: "Recalculate" }));
 
     expect(
-      await screen.findByRole("heading", { name: /How big is your Bubble app/i })
+      await screen.findByRole("heading", { name: /How big is your app/i })
+    ).toBeInTheDocument();
+  }, 10000);
+
+  it("skips the admin step when a partial rebuild is selected", async () => {
+    const user = userEvent.setup();
+
+    vi.mocked(fetch).mockImplementation(() =>
+      Promise.resolve(
+        new Response(
+          JSON.stringify({
+            classification: {
+              simple: 3,
+              medium: 1,
+              complex: 0,
+              summary: "A focused feature set.",
+              source: "fallback",
+            },
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } }
+        )
+      )
+    );
+
+    render(<EstimatorWizard />);
+
+    await screen.findByRole("heading", { name: /How big is your app/i });
+    await user.click(screen.getByRole("radio", { name: /^Medium/i }));
+    await user.click(getActionButton("Next"));
+
+    await screen.findByRole("heading", { name: /How many types of users/i });
+    await user.click(screen.getByRole("radio", { name: /^Two or three/i }));
+    await user.click(getActionButton("Next"));
+
+    await screen.findByRole("heading", { name: /What are you looking for/i });
+    await user.click(
+      screen.getByRole("radio", { name: /A partial rebuild/i })
+    );
+    await user.click(getActionButton("Next"));
+
+    // Step 4: features (pre-filled, but user can still advance)
+    await screen.findByRole("heading", {
+      name: /What are the main things people do/i,
+    });
+    await user.click(getActionButton("Next"));
+
+    // Step 5: integrations
+    await screen.findByRole("heading", { name: /Which tools does your app connect to/i });
+    await user.click(getActionButton("Next"));
+
+    // Step 6: UI quality
+    await screen.findByRole("heading", {
+      name: /How should the app look/i,
+    });
+    await user.click(screen.getByRole("radio", { name: /^Polished and branded/i }));
+    await user.click(screen.getByRole("radio", { name: /^Desktop and mobile/i }));
+    await user.click(getActionButton("Next"));
+
+    // Step 7: designs
+    await screen.findByRole("heading", { name: /Do you already have designs/i });
+    await user.click(screen.getByRole("radio", { name: /^Some are done/i }));
+    await user.click(getActionButton("Next"));
+
+    // Admin step (index 7) should be skipped — we jump straight to migration (index 8).
+    await waitFor(() => {
+      expect(
+        screen.queryByRole("heading", { name: /Do you need an admin dashboard/i })
+      ).not.toBeInTheDocument();
+    });
+    expect(
+      await screen.findByRole("heading", {
+        name: /Tell us about your data/i,
+      })
     ).toBeInTheDocument();
   }, 10000);
 });
 
 async function advanceToIntegrationStep(user: ReturnType<typeof userEvent.setup>) {
-  await screen.findByRole("heading", { name: /How big is your Bubble app/i });
-  await user.click(screen.getByRole("radio", { name: /Mid-sized app/i }));
+  await screen.findByRole("heading", { name: /How big is your app/i });
+  await user.click(screen.getByRole("radio", { name: /^Medium/i }));
   await user.click(getActionButton("Next"));
 
-  await screen.findByRole("heading", { name: /How many user roles does your app have/i });
-  await user.click(screen.getByRole("radio", { name: /2 to 3 roles/i }));
+  await screen.findByRole("heading", { name: /How many types of users/i });
+  await user.click(screen.getByRole("radio", { name: /^Two or three/i }));
   await user.click(getActionButton("Next"));
 
-  await screen.findByRole("heading", { name: /What type of rebuild do you need/i });
-  await user.click(screen.getByRole("radio", { name: /Same logic, redesigned/i }));
+  await screen.findByRole("heading", { name: /What are you looking for/i });
+  await user.click(screen.getByRole("radio", { name: /An exact rebuild/i }));
   await user.click(getActionButton("Next"));
 
   await screen.findByRole("heading", {
-    name: /How many features sit at each complexity level/i,
+    name: /What are the main things people do/i,
   });
-  await user.clear(screen.getByLabelText("Simple features"));
-  await user.type(screen.getByLabelText("Simple features"), "3");
-  await user.clear(screen.getByLabelText("Medium features"));
-  await user.type(screen.getByLabelText("Medium features"), "2");
-  await user.clear(screen.getByLabelText("Complex features"));
-  await user.type(screen.getByLabelText("Complex features"), "1");
+  await user.type(
+    screen.getByLabelText("Main things users do"),
+    "Users sign up, browse listings, book appointments, pay."
+  );
+  await user.click(getActionButton("Analyze Features"));
+  await screen.findByTestId("feature-classification");
   await user.click(getActionButton("Next"));
 
   await screen.findByRole("heading", {
-    name: /What integrations does your Bubble app use/i,
+    name: /Which tools does your app connect to/i,
   });
 }
 
@@ -192,34 +313,36 @@ async function completeGoldenFlow(user: ReturnType<typeof userEvent.setup>) {
   await user.click(getActionButton("Next"));
 
   await screen.findByRole("heading", {
-    name: /What level of UI quality and device support are you aiming for/i,
+    name: /How should the app look/i,
   });
-  await user.click(screen.getByRole("radio", { name: /Polished responsive/i }));
-  await user.click(screen.getByRole("radio", { name: /Desktop plus mobile/i }));
+  await user.click(screen.getByRole("radio", { name: /^Polished and branded/i }));
+  await user.click(screen.getByRole("radio", { name: /^Desktop and mobile/i }));
   await user.click(getActionButton("Next"));
 
-  await screen.findByRole("heading", { name: /Do you have existing designs/i });
-  await user.click(screen.getByRole("radio", { name: /Partial designs/i }));
+  await screen.findByRole("heading", { name: /Do you already have designs/i });
+  await user.click(screen.getByRole("radio", { name: /^Some are done/i }));
   await user.click(getActionButton("Next"));
 
   await screen.findByRole("heading", { name: /Do you need an admin dashboard/i });
-  await user.click(screen.getByRole("radio", { name: /Basic admin/i }));
+  await user.click(screen.getByRole("radio", { name: /^Basic admin/i }));
   await user.click(getActionButton("Next"));
 
   await screen.findByRole("heading", {
-    name: /What migration, cleanup, or reverse-engineering work is part of the rebuild/i,
+    name: /Tell us about your data/i,
   });
-  await user.click(screen.getByRole("radio", { name: /No migration/i }));
-  await user.click(screen.getByRole("radio", { name: /No tech debt fix/i }));
-  await user.click(screen.getByRole("radio", { name: /Partial or outdated docs/i }));
+  await user.click(screen.getByRole("radio", { name: /^No, we're starting fresh/i }));
+  await user.click(screen.getByRole("radio", { name: /^No, it's in good shape/i }));
+  await user.click(
+    screen.getByRole("radio", { name: /^Somewhat documented/i })
+  );
   await user.click(getActionButton("Next"));
 
-  await screen.findByRole("heading", { name: /What extras should we include/i });
+  await screen.findByRole("heading", { name: /Anything else to include/i });
   await user.click(getActionButton("Get Estimate"));
 
   await waitFor(() =>
     expect(
-      screen.getByRole("heading", { name: /\$49,300 - \$69,600/i })
+      screen.getByRole("heading", { name: /\$24,000\s*–\s*\$34,000/i })
     ).toBeInTheDocument()
   );
 }

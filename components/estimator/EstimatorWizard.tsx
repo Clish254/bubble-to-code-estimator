@@ -3,7 +3,9 @@
 import {
   startTransition,
   useDeferredValue,
+  useEffect,
   useReducer,
+  useRef,
   type Dispatch,
 } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
@@ -28,23 +30,29 @@ import {
   normalizeEstimateInput,
 } from "@/lib/calculator";
 import {
+  createFallbackFeatureClassification,
+  normalizeFeaturesText,
+} from "@/lib/features";
+import {
   createFallbackClassifications,
   normalizeIntegrationText,
   parseIntegrationInput,
 } from "@/lib/integrations";
-import { INTEGRATION_HOURS } from "@/lib/integrations";
 import { cn } from "@/lib/utils";
 import type {
   ClassificationResponse,
   EstimatorAnswers,
   EstimatorState,
-  IntegrationComplexity,
+  FeatureClassification,
+  FeatureClassificationResponse,
 } from "@/lib/types";
 
 const INITIAL_ANSWERS: EstimatorAnswers = {
   appSize: null,
   userRoles: null,
   rebuildType: null,
+  featuresText: "",
+  featureClassification: null,
   simpleFeatureCount: 0,
   mediumFeatureCount: 0,
   complexFeatureCount: 0,
@@ -69,6 +77,9 @@ const INITIAL_STATE: EstimatorState = {
   integrationStatus: "idle",
   integrationMessage: null,
   lastClassifiedText: "",
+  featureStatus: "idle",
+  featureMessage: null,
+  lastClassifiedFeaturesText: "",
 };
 
 type Action =
@@ -83,13 +94,27 @@ type Action =
       value: number;
     }
   | {
-      type: "set-integrations-text";
+      type: "set-features-text";
       value: string;
     }
   | {
-      type: "set-integration-complexity";
-      integrationName: string;
-      complexity: IntegrationComplexity;
+      type: "start-feature-classification";
+    }
+  | {
+      type: "complete-feature-classification";
+      classification: FeatureClassification;
+      message: string | null;
+      classifiedText: string;
+    }
+  | {
+      type: "fail-feature-classification";
+      classification: FeatureClassification;
+      message: string;
+      classifiedText: string;
+    }
+  | {
+      type: "set-integrations-text";
+      value: string;
     }
   | {
       type: "start-integration-classification";
@@ -120,14 +145,16 @@ type Action =
 
 function reducer(state: EstimatorState, action: Action): EstimatorState {
   switch (action.type) {
-    case "set-answer":
+    case "set-answer": {
+      const nextAnswers = {
+        ...state.answers,
+        [action.key]: action.value,
+      };
       return {
         ...state,
-        answers: {
-          ...state.answers,
-          [action.key]: action.value,
-        },
+        answers: applyInference(nextAnswers),
       };
+    }
     case "set-feature-count":
       return {
         ...state,
@@ -135,6 +162,55 @@ function reducer(state: EstimatorState, action: Action): EstimatorState {
           ...state.answers,
           [action.key]: sanitizeCount(action.value),
         },
+      };
+    case "set-features-text":
+      return {
+        ...state,
+        answers: {
+          ...state.answers,
+          featuresText: action.value,
+          featureClassification: null,
+          simpleFeatureCount: 0,
+          mediumFeatureCount: 0,
+          complexFeatureCount: 0,
+        },
+        featureStatus: "idle",
+        featureMessage: null,
+        lastClassifiedFeaturesText: "",
+      };
+    case "start-feature-classification":
+      return {
+        ...state,
+        featureStatus: "loading",
+        featureMessage: null,
+      };
+    case "complete-feature-classification":
+      return {
+        ...state,
+        answers: {
+          ...state.answers,
+          featureClassification: action.classification,
+          simpleFeatureCount: action.classification.simple,
+          mediumFeatureCount: action.classification.medium,
+          complexFeatureCount: action.classification.complex,
+        },
+        featureStatus: "ready",
+        featureMessage: action.message,
+        lastClassifiedFeaturesText: action.classifiedText,
+      };
+    case "fail-feature-classification":
+      return {
+        ...state,
+        answers: {
+          ...state.answers,
+          featureClassification: action.classification,
+          simpleFeatureCount: action.classification.simple,
+          mediumFeatureCount: action.classification.medium,
+          complexFeatureCount: action.classification.complex,
+        },
+        featureStatus: "error",
+        featureMessage: action.message,
+        lastClassifiedFeaturesText: action.classifiedText,
       };
     case "set-integrations-text":
       return {
@@ -147,24 +223,6 @@ function reducer(state: EstimatorState, action: Action): EstimatorState {
         integrationStatus: "idle",
         integrationMessage: null,
         lastClassifiedText: "",
-      };
-    case "set-integration-complexity":
-      return {
-        ...state,
-        answers: {
-          ...state.answers,
-          integrationClassifications: state.answers.integrationClassifications.map(
-            (classification) =>
-              classification.name === action.integrationName
-                ? {
-                    ...classification,
-                    complexity: action.complexity,
-                    hours: INTEGRATION_HOURS[action.complexity],
-                    source: "manual",
-                  }
-                : classification
-          ),
-        },
       };
     case "start-integration-classification":
       return {
@@ -221,6 +279,7 @@ function EstimatorWizard() {
   const [state, dispatch] = useReducer(reducer, INITIAL_STATE);
   const deferredAnswers = useDeferredValue(state.answers);
   const reducedMotion = useReducedMotion();
+  const lastAutoSkipKey = useRef<string | null>(null);
 
   const estimate = isEstimateReady(deferredAnswers)
     ? calculateEstimate(normalizeEstimateInput(deferredAnswers))
@@ -234,17 +293,110 @@ function EstimatorWizard() {
       state.lastClassifiedText &&
     state.answers.integrationClassifications.length === integrationNames.length;
 
+  const hasFeaturesText = Boolean(state.answers.featuresText.trim());
+  const freshFeatureClassification =
+    hasFeaturesText &&
+    state.featureStatus !== "loading" &&
+    state.answers.featureClassification !== null &&
+    normalizeFeaturesText(state.answers.featuresText) ===
+      state.lastClassifiedFeaturesText;
+
   const isResultsStep = state.currentStep === RESULT_STEP_INDEX;
   const showIntro = state.currentStep === 0 || isResultsStep;
   const currentTitle = isResultsStep
     ? "Estimate ready"
     : STEP_TITLES[state.currentStep] ?? "Estimator";
 
-  const primaryLabel = getPrimaryLabel(state, freshClassification);
+  const primaryLabel = getPrimaryLabel(
+    state,
+    freshClassification,
+    freshFeatureClassification,
+    hasFeaturesText
+  );
   const canGoBack = state.currentStep > 0 && !isResultsStep;
   const canUsePrimary = getPrimaryActionEnabled(state);
 
+  useEffect(() => {
+    if (isResultsStep) {
+      return;
+    }
+    if (!isStepInferred(state.currentStep, state.answers)) {
+      return;
+    }
+    const key = `${state.currentStep}:${state.direction}`;
+    if (lastAutoSkipKey.current === key) {
+      return;
+    }
+    lastAutoSkipKey.current = key;
+    const nextStep =
+      state.direction === -1
+        ? Math.max(0, state.currentStep - 1)
+        : state.currentStep === TOTAL_STEPS - 1
+        ? RESULT_STEP_INDEX
+        : state.currentStep + 1;
+    startTransition(() =>
+      dispatch({
+        type: "go-to-step",
+        step: nextStep,
+        direction: state.direction,
+      })
+    );
+  }, [state.currentStep, state.direction, state.answers, isResultsStep]);
+
   async function handlePrimaryAction() {
+    if (
+      state.currentStep === 3 &&
+      hasFeaturesText &&
+      !freshFeatureClassification
+    ) {
+      startTransition(() => dispatch({ type: "start-feature-classification" }));
+
+      try {
+        const response = await fetch("/api/classify-features", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            features: state.answers.featuresText,
+            appSize: state.answers.appSize,
+          }),
+        });
+
+        const payload = (await response.json()) as FeatureClassificationResponse;
+        const classification =
+          payload.classification ??
+          createFallbackFeatureClassification(
+            state.answers.appSize,
+            "We couldn't read that automatically, so we used a baseline feature mix."
+          );
+
+        startTransition(() =>
+          dispatch({
+            type: "complete-feature-classification",
+            classification,
+            message: payload.message ?? null,
+            classifiedText: normalizeFeaturesText(state.answers.featuresText),
+          })
+        );
+      } catch {
+        startTransition(() =>
+          dispatch({
+            type: "fail-feature-classification",
+            classification: createFallbackFeatureClassification(
+              state.answers.appSize,
+              "We couldn't verify that automatically, so we used a baseline feature mix."
+            ),
+            message:
+              "We hit an issue while mapping your features, so we used a baseline mix. You can keep going.",
+            classifiedText: normalizeFeaturesText(state.answers.featuresText),
+          })
+        );
+      }
+
+      return;
+    }
+
     if (state.currentStep === 4 && integrationNames.length && !freshClassification) {
       startTransition(() => dispatch({ type: "start-integration-classification" }));
 
@@ -429,7 +581,7 @@ function EstimatorIntroPanel({ compact = false }: EstimatorIntroPanelProps) {
                 : "max-w-[12ch] text-5xl leading-[0.92] xl:text-6xl"
             )}
           >
-            Turn Bubble complexity into a sharper rebuild range.
+            See what a rebuild of your Bubble app could cost.
           </h1>
           <p
             className={cn(
@@ -437,26 +589,25 @@ function EstimatorIntroPanel({ compact = false }: EstimatorIntroPanelProps) {
               compact ? "text-sm leading-6 sm:text-base sm:leading-7" : "text-base leading-7 sm:text-[1.05rem]"
             )}
           >
-            This estimator is built for founders, operators, and product teams
-            exploring a Bubble-to-code rebuild. Share the shape of your app,
-            and we’ll return a realistic cost range, timeline range, and tier
-            recommendation before you book a call.
+            Answer a few plain-language questions about your app, and
+            we&apos;ll give you a ballpark price and timeline. Takes about two
+            minutes.
           </p>
         </div>
       </div>
 
-      <div className={cn("grid gap-4", compact ? "sm:grid-cols-3" : "xl:grid-cols-3")}>
+      <div className="grid grid-cols-1 gap-4">
         <EstimatorIntroStat
-          value="10 steps"
-          description="Structured around Goodspeed’s Bubble-to-code worksheet."
+          value="A few minutes"
+          description="Ten quick questions. No sign-up, no sales call first."
         />
         <EstimatorIntroStat
-          value="Range-based"
-          description="Built to start a serious conversation, not fake invoice precision."
+          value="A real range"
+          description="Honest numbers to start a conversation, not a made-up precise quote."
         />
         <EstimatorIntroStat
-          value="AI-assisted"
-          description="Only integrations are classified with AI. Everything else is deterministic."
+          value="Your shortcut"
+          description="Skip the back-and-forth. Get oriented before you book a call."
         />
       </div>
     </div>
@@ -514,18 +665,11 @@ function renderStep(
     case 3:
       return (
         <StepFeatures
-          simpleCount={state.answers.simpleFeatureCount}
-          mediumCount={state.answers.mediumFeatureCount}
-          complexCount={state.answers.complexFeatureCount}
-          onSimpleChange={(value) =>
-            dispatch({ type: "set-feature-count", key: "simpleFeatureCount", value })
-          }
-          onMediumChange={(value) =>
-            dispatch({ type: "set-feature-count", key: "mediumFeatureCount", value })
-          }
-          onComplexChange={(value) =>
-            dispatch({ type: "set-feature-count", key: "complexFeatureCount", value })
-          }
+          value={state.answers.featuresText}
+          status={state.featureStatus}
+          message={state.featureMessage}
+          classification={state.answers.featureClassification}
+          onChange={(value) => dispatch({ type: "set-features-text", value })}
         />
       );
     case 4:
@@ -536,13 +680,6 @@ function renderStep(
           message={state.integrationMessage}
           classifications={state.answers.integrationClassifications}
           onChange={(value) => dispatch({ type: "set-integrations-text", value })}
-          onComplexityChange={(integrationName, complexity) =>
-            dispatch({
-              type: "set-integration-complexity",
-              integrationName,
-              complexity,
-            })
-          }
         />
       );
     case 5:
@@ -623,7 +760,21 @@ function renderStep(
   }
 }
 
-function getPrimaryLabel(state: EstimatorState, hasFreshClassification: boolean) {
+function getPrimaryLabel(
+  state: EstimatorState,
+  hasFreshIntegrationClassification: boolean,
+  hasFreshFeatureClassification: boolean,
+  hasFeaturesText: boolean
+) {
+  if (state.currentStep === 3) {
+    if (state.featureStatus === "loading") {
+      return "Analyzing...";
+    }
+    if (hasFeaturesText && !hasFreshFeatureClassification) {
+      return "Analyze Features";
+    }
+  }
+
   if (state.currentStep === 4) {
     if (state.integrationStatus === "loading") {
       return "Analyzing...";
@@ -631,7 +782,7 @@ function getPrimaryLabel(state: EstimatorState, hasFreshClassification: boolean)
 
     const integrationCount = parseIntegrationInput(state.answers.integrationsText).length;
 
-    if (integrationCount > 0 && !hasFreshClassification) {
+    if (integrationCount > 0 && !hasFreshIntegrationClassification) {
       return "Analyze Integrations";
     }
   }
@@ -648,7 +799,7 @@ function getPrimaryActionEnabled(state: EstimatorState) {
     case 2:
       return Boolean(state.answers.rebuildType);
     case 3:
-      return true;
+      return state.featureStatus !== "loading";
     case 4:
       return state.integrationStatus !== "loading";
     case 5:
@@ -668,6 +819,38 @@ function getPrimaryActionEnabled(state: EstimatorState) {
     default:
       return false;
   }
+}
+
+function applyInference(answers: EstimatorAnswers): EstimatorAnswers {
+  let next = answers;
+
+  if (answers.rebuildType === "partial") {
+    if (next.adminDashboard === null) {
+      next = { ...next, adminDashboard: "none" };
+    }
+    if (next.featureClassification === null && !next.featuresText.trim()) {
+      const fallback = createFallbackFeatureClassification(
+        next.appSize,
+        "We pre-filled a baseline feature mix for a partial rebuild. You can refine it on a call."
+      );
+      next = {
+        ...next,
+        featureClassification: fallback,
+        simpleFeatureCount: fallback.simple,
+        mediumFeatureCount: fallback.medium,
+        complexFeatureCount: fallback.complex,
+      };
+    }
+  }
+
+  return next;
+}
+
+function isStepInferred(stepIndex: number, answers: EstimatorAnswers): boolean {
+  if (answers.rebuildType === "partial" && stepIndex === 7) {
+    return answers.adminDashboard !== null;
+  }
+  return false;
 }
 
 function sanitizeCount(value: number) {

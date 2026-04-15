@@ -8,6 +8,8 @@ function createBaseAnswers(): EstimatorAnswers {
     appSize: "mid",
     userRoles: "twoToThree",
     rebuildType: "redesigned",
+    featuresText: "",
+    featureClassification: null,
     simpleFeatureCount: 3,
     mediumFeatureCount: 2,
     complexFeatureCount: 1,
@@ -16,7 +18,7 @@ function createBaseAnswers(): EstimatorAnswers {
       {
         name: "Stripe",
         complexity: "low",
-        hours: 12,
+        hours: 7,
         reason: "Matches the low-complexity Stripe reference.",
       },
     ],
@@ -37,14 +39,14 @@ describe("calculateEstimate", () => {
   it("matches the mapping-sheet canonical scenario", () => {
     const result = calculateEstimate(normalizeEstimateInput(createBaseAnswers()));
 
-    expect(result.directHours).toBe(604);
-    expect(result.costMid).toBe(57984);
-    expect(result.costLow).toBe(49286.4);
-    expect(result.costHigh).toBe(69580.8);
-    expect(result.totalWeeks).toBe(24.65);
-    expect(result.monthsLow).toBeCloseTo(4.83891, 4);
-    expect(result.monthsHigh).toBeCloseTo(6.83141, 4);
-    expect(result.tier).toBe("Scale");
+    expect(result.directHours).toBe(362);
+    expect(result.costMid).toBe(34752);
+    expect(result.costLow).toBe(29539.2);
+    expect(result.costHigh).toBe(41702.4);
+    expect(result.totalWeeks).toBe(15.575);
+    expect(result.monthsLow).toBeCloseTo(3.05745, 4);
+    expect(result.monthsHigh).toBeCloseTo(4.31640, 4);
+    expect(result.tier).toBe("Growth");
   });
 
   it("stacks no-design lift and formal design phase hours", () => {
@@ -57,7 +59,7 @@ describe("calculateEstimate", () => {
       })
     );
 
-    expect(withDesignWork.directHours - baseline.directHours).toBe(120);
+    expect(withDesignWork.directHours - baseline.directHours).toBe(72);
   });
 
   it("applies the full QA multiplier instead of the basic QA multiplier", () => {
@@ -113,19 +115,19 @@ describe("calculateEstimate", () => {
           {
             name: "Salesforce",
             complexity: "high",
-            hours: 64,
+            hours: 38,
             reason: "High-complexity CRM sync.",
           },
           {
             name: "QuickBooks",
             complexity: "high",
-            hours: 64,
+            hours: 38,
             reason: "High-complexity accounting sync.",
           },
           {
             name: "custom SSO",
             complexity: "high",
-            hours: 64,
+            hours: 38,
             reason: "Enterprise auth complexity.",
           },
         ],

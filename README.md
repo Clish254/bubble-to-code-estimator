@@ -131,19 +131,21 @@ The current tested canonical scenario is:
 
 That currently resolves to:
 
-- `604` direct hours
-- `$57,984` mid estimate
-- `$49,300 - $69,600` client-facing range after presentation rounding
-- `24.65` total weeks
-- `4.8 - 6.8 months`
-- `Scale` tier
+- `362` direct hours internally
+- `$34,752` mid estimate internally
+- `$30,000 - $42,000` client-facing range (rounded up to nearest $1,000)
+- `15.575` total weeks internally
+- `3 - 4 months` client-facing timeline (adaptive: days under ~1 month, months above)
+- `Growth` tier
+
+Prices and timelines are stored in hours and dollars internally and converted to days/months and rounded-up currency at the display layer only.
 
 ## Testing
 
 Current automated coverage includes:
 
 - Calculator unit tests in `lib/calculator.test.ts`
-- API route tests in `app/api/classify-integrations/route.test.ts`
+- API route tests in `app/api/classify-integrations/route.test.ts` and `app/api/classify-features/route.test.ts`
 - Wizard interaction tests in `components/estimator/EstimatorWizard.test.tsx`
 
 Run the full verification pass with:

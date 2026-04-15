@@ -12,31 +12,21 @@ const OPTIONS: Array<{
   value: RebuildTypeOption;
   title: string;
   description: string;
-  badge: string;
 }> = [
   {
     value: "sameUx",
-    title: "Same app, same UX",
-    description: "A close rebuild of the current product without fresh UX or architectural ambition.",
-    badge: "×0.80",
-  },
-  {
-    value: "redesigned",
-    title: "Same logic, redesigned",
-    description: "A rebuild with thoughtful UI refinement while the underlying feature set stays familiar.",
-    badge: "×1.00",
+    title: "An exact rebuild",
+    description: "Same app, same flows, just moved off Bubble and onto code.",
   },
   {
     value: "partial",
-    title: "Partial rebuild",
-    description: "Only a portion of the product moves to code, keeping the overall scope tighter.",
-    badge: "×0.70",
+    title: "A partial rebuild",
+    description: "Move part of the app to code, leave the rest on Bubble for now.",
   },
   {
     value: "fullRebuild",
-    title: "Full rebuild plus improvements",
-    description: "A broader rewrite with improved architecture, UX, and product capability.",
-    badge: "×1.30",
+    title: "A full redesign",
+    description: "A fresh version of the product, with a new look and improved flows.",
   },
 ];
 
@@ -44,9 +34,9 @@ function StepRebuildType({ value, onChange }: StepRebuildTypeProps) {
   return (
     <StepShell
       eyebrow="Step 3"
-      title="What type of rebuild do you need?"
-      description="This choice acts as a multiplier across the broader build, rather than adding fixed hours on its own."
-      aside="If you're aiming for a cleaner architecture, a more ambitious UX, or meaningful product improvements, choose the fuller rebuild path."
+      title="What are you looking for?"
+      description="How far do you want this rebuild to go?"
+      aside="Pick the closest match. We'll dig into the detail on a call."
     >
       <RadioGroup
         value={value ?? ""}
@@ -59,7 +49,6 @@ function StepRebuildType({ value, onChange }: StepRebuildTypeProps) {
             value={option.value}
             title={option.title}
             description={option.description}
-            badge={option.badge}
             checked={value === option.value}
           />
         ))}

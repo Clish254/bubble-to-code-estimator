@@ -12,9 +12,8 @@ function StepDesigns({ value, onChange }: StepDesignsProps) {
   return (
     <StepShell
       eyebrow="Step 7"
-      title="Do you have existing designs?"
-      description="We use this to decide how much of the frontend direction is already established before the coded rebuild begins."
-      aside="If there are no designs yet, we add the upfront design lift. If you also include a formal design phase later, both pieces stack together."
+      title="Do you already have designs?"
+      description="Figma, Sketch, or anything our team can build from."
     >
       <RadioGroup
         value={value ?? ""}
@@ -24,22 +23,19 @@ function StepDesigns({ value, onChange }: StepDesignsProps) {
         <RadioOption
           value="ready"
           title="Yes, designs are ready"
-          description="You have a clean Figma or Sketch source of truth the rebuild can work from."
-          badge="×0.90"
+          description="A complete set our team can build straight from."
           checked={value === "ready"}
         />
         <RadioOption
           value="partial"
-          title="Partial designs"
-          description="Some core screens or components are designed, but the system is not fully locked in."
-          badge="×1.00"
+          title="Some are done, some aren't"
+          description="A few key screens exist, but the rest still need design work."
           checked={value === "partial"}
         />
         <RadioOption
           value="none"
-          title="No designs yet"
-          description="The coded rebuild still needs upfront design direction before implementation can move quickly."
-          badge="+40 hrs"
+          title="Not yet"
+          description="No designs yet. We'll build them before the rebuild starts."
           checked={value === "none"}
         />
       </RadioGroup>

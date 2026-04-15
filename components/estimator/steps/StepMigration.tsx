@@ -28,14 +28,12 @@ function StepMigration({
   return (
     <StepShell
       eyebrow="Step 9"
-      title="What migration, cleanup, or reverse-engineering work is part of the rebuild?"
-      description="This is where we account for the friction around moving real data, untangling Bubble logic, and reconstructing intent from incomplete documentation."
-      aside="Migration and tech debt add direct hours. Documentation acts as a multiplier because it changes how much reverse engineering Goodspeed needs to do."
+      title="Tell us about your data and your app today"
+      description="Three quick questions about moving data over, fixing issues, and what's already written down."
     >
       <Card
-        eyebrow="Data migration"
-        title="How complex is the Bubble data migration?"
-        description="Think about whether you can move data almost as-is, or whether it needs mapping, cleaning, validation, or reconciliation."
+        eyebrow="Data"
+        title="Do you need to move data from Bubble to the new app?"
       >
         <RadioGroup
           value={dataMigration ?? ""}
@@ -46,32 +44,28 @@ function StepMigration({
         >
           <RadioOption
             value="none"
-            title="No migration"
-            description="A fresh start or low-risk manual carryover with no dedicated migration work."
-            badge="+0 hrs"
+            title="No, we're starting fresh"
+            description="No existing data needs to carry over."
             checked={dataMigration === "none"}
           />
           <RadioOption
             value="simple"
-            title="Simple migration"
-            description="Export and import with some field mapping, but without heavy transformation logic."
-            badge="+24 hrs"
+            title="Yes, a straightforward move"
+            description="The data is clean and can move over with light mapping."
             checked={dataMigration === "simple"}
           />
           <RadioOption
             value="complex"
-            title="Complex migration"
-            description="Transformation, validation, cleaning, reconciliation, or migration safety requirements."
-            badge="+80 hrs"
+            title="Yes, and it's messy"
+            description="The data needs cleaning, checking, or restructuring on the way."
             checked={dataMigration === "complex"}
           />
         </RadioGroup>
       </Card>
 
       <Card
-        eyebrow="Tech debt"
-        title="How much cleanup or architecture work comes with the rebuild?"
-        description="This captures the extra work needed beyond a straightforward reimplementation."
+        eyebrow="Cleanup"
+        title="Does your current app need cleanup work?"
       >
         <RadioGroup
           value={techDebt ?? ""}
@@ -80,32 +74,28 @@ function StepMigration({
         >
           <RadioOption
             value="none"
-            title="No tech debt fix"
-            description="Rebuild the current logic without a broader architecture reset."
-            badge="+0 hrs"
+            title="No, it's in good shape"
+            description="We can rebuild what's there without rethinking anything."
             checked={techDebt === "none"}
           />
           <RadioOption
             value="some"
-            title="Some improvements needed"
-            description="Refactoring core patterns, stabilizing workflows, or removing obvious implementation drag."
-            badge="+40 hrs"
+            title="A few things could be better"
+            description="Some workflows or patterns could use a tidy-up along the way."
             checked={techDebt === "some"}
           />
           <RadioOption
             value="major"
-            title="Major architecture overhaul"
-            description="A deeper rethink of structure, scalability, security, or operating patterns."
-            badge="+100 hrs"
+            title="It needs real rework"
+            description="Big parts of it should be rethought before we rebuild."
             checked={techDebt === "major"}
           />
         </RadioGroup>
       </Card>
 
       <Card
-        eyebrow="Documentation"
-        title="How much usable documentation exists?"
-        description="Even partial docs change how much reverse engineering the team needs to do."
+        eyebrow="Docs"
+        title="How well is your app documented?"
       >
         <RadioGroup
           value={documentation ?? ""}
@@ -116,23 +106,20 @@ function StepMigration({
         >
           <RadioOption
             value="good"
-            title="Good documentation"
-            description="Workflows, logic, and product rules are already documented clearly."
-            badge="×0.90"
+            title="Well documented"
+            description="We can understand how it works without guessing."
             checked={documentation === "good"}
           />
           <RadioOption
             value="partial"
-            title="Partial or outdated docs"
-            description="Some guidance exists, but it won’t fully remove discovery work."
-            badge="×1.00"
+            title="Somewhat documented"
+            description="Some notes exist, but we'll still need to figure things out."
             checked={documentation === "partial"}
           />
           <RadioOption
             value="none"
             title="No documentation"
-            description="The rebuild needs more reverse engineering from behavior, data, and Bubble logic."
-            badge="×1.15"
+            description="We'll learn the app by digging through it ourselves."
             checked={documentation === "none"}
           />
         </RadioGroup>

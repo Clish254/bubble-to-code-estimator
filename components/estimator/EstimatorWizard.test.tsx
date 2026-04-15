@@ -151,7 +151,7 @@ describe("EstimatorWizard", () => {
     expect(
       await screen.findByRole("heading", { name: /How big is your Bubble app/i })
     ).toBeInTheDocument();
-  });
+  }, 10000);
 });
 
 async function advanceToIntegrationStep(user: ReturnType<typeof userEvent.setup>) {

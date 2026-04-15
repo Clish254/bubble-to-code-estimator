@@ -321,7 +321,7 @@ function EstimatorWizard() {
   const motionDistance = reducedMotion ? 0 : 36;
 
   return (
-    <div className="surface-panel grid h-full min-h-0 w-full overflow-hidden rounded-[2rem] border border-border/80 bg-[var(--gs-surface-strong)] lg:grid-cols-[minmax(0,0.84fr)_minmax(0,1.16fr)]">
+    <div className="surface-panel grid h-full min-h-0 w-full overflow-y-auto overscroll-y-contain rounded-none border border-border/80 bg-[var(--gs-surface-strong)] touch-pan-y [scrollbar-gutter:stable] [-webkit-overflow-scrolling:touch] sm:rounded-[2rem] lg:overflow-hidden lg:grid-cols-[minmax(0,0.84fr)_minmax(0,1.16fr)]">
       {showIntro ? (
         <div className="hidden min-h-0 border-r border-border/70 bg-[linear-gradient(180deg,rgba(255,255,255,0.58),rgba(255,252,248,0.28))] lg:flex">
           <EstimatorIntroPanel />
@@ -330,7 +330,7 @@ function EstimatorWizard() {
 
       <div
         className={cn(
-          "flex min-h-0 flex-col gap-4 p-4 sm:gap-5 sm:p-6 lg:p-8",
+          "flex min-h-full flex-col gap-4 p-4 sm:gap-5 sm:p-6 lg:min-h-0 lg:p-8",
           !showIntro && "lg:col-span-full"
         )}
       >
@@ -342,8 +342,8 @@ function EstimatorWizard() {
 
         <ProgressBar currentStep={state.currentStep} currentTitle={currentTitle} />
 
-        <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[2rem] border border-border/80 bg-[var(--gs-surface)]">
-          <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-5 lg:p-6">
+        <div className="flex min-h-0 flex-1 flex-col overflow-visible rounded-[2rem] border border-border/80 bg-[var(--gs-surface)] lg:overflow-hidden">
+          <div className="min-h-0 flex-1 overflow-visible p-4 sm:p-5 lg:overflow-y-auto lg:p-6">
             <AnimatePresence initial={false} mode="wait" custom={state.direction}>
               <motion.div
                 key={isResultsStep ? "results" : state.currentStep}

@@ -72,7 +72,7 @@ function SelectableCheckbox({
   return (
     <label
       className={cn(
-        "flex min-h-28 cursor-pointer items-start gap-4 rounded-[1.4rem] border border-border/80 bg-white/75 px-4 py-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-[var(--gs-soft)] hover:bg-white",
+        "flex cursor-pointer items-start gap-4 rounded-[1.4rem] border border-border/80 bg-white/75 px-4 py-3 transition-all duration-200 hover:-translate-y-0.5 hover:border-[var(--gs-soft)] hover:bg-white",
         checked &&
           "border-[var(--gs-deep)] bg-[color-mix(in_srgb,var(--primary)_18%,white)] shadow-[0_18px_38px_-28px_rgba(54,73,60,0.45)]"
       )}
@@ -82,7 +82,7 @@ function SelectableCheckbox({
         onCheckedChange={(nextChecked) => onChange(Boolean(nextChecked))}
         className="mt-1 size-5 rounded-[0.45rem] border-border/90 bg-white data-checked:border-[var(--gs-deep)] data-checked:bg-[var(--gs-deep)]"
       />
-      <div className="space-y-2">
+      <div className="space-y-1">
         <span className="text-base font-semibold tracking-[-0.02em]">{title}</span>
         <p className="max-w-[52ch] text-sm leading-6 text-muted-foreground">
           {description}

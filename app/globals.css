@@ -181,3 +181,41 @@
     0 1px 0 rgba(255, 255, 255, 0.65) inset,
     0 18px 50px -28px var(--gs-shadow);
 }
+
+/*
+ * Iframe embed mode. When EmbedResizer detects the estimator is embedded it
+ * sets `data-embedded="true"` on <html>. We then relax the viewport-height
+ * layout so the document can grow to fit its content, letting the parent page
+ * own the scroll. The outbound postMessage tells Framer how tall to make the
+ * iframe; these rules make the measurement meaningful.
+ */
+html[data-embedded="true"],
+html[data-embedded="true"] body {
+  height: auto;
+  min-height: 0;
+  overflow: visible;
+}
+
+html[data-embedded="true"] main[data-estimator-root] {
+  height: auto;
+  min-height: 0;
+  overflow: visible;
+  align-items: flex-start;
+}
+
+html[data-embedded="true"] main[data-estimator-root] > section {
+  height: auto;
+  min-height: 0;
+}
+
+html[data-embedded="true"] [data-estimator-scroll] {
+  height: auto;
+  min-height: 0;
+  max-height: none;
+  overflow: visible;
+  overscroll-behavior: auto;
+}
+
+html[data-embedded="true"] [data-estimator-step] {
+  min-height: 0;
+}

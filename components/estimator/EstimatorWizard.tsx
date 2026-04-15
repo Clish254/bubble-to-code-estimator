@@ -473,7 +473,10 @@ function EstimatorWizard() {
   const motionDistance = reducedMotion ? 0 : 36;
 
   return (
-    <div className="surface-panel grid h-full min-h-0 w-full overflow-y-auto overscroll-y-contain rounded-none border border-border/80 bg-[var(--gs-surface-strong)] touch-pan-y [scrollbar-gutter:stable] [-webkit-overflow-scrolling:touch] sm:rounded-[2rem] lg:overflow-hidden lg:grid-cols-[minmax(0,0.84fr)_minmax(0,1.16fr)]">
+    <div
+      data-estimator-scroll
+      className="surface-panel grid h-full min-h-0 w-full overflow-y-auto overscroll-y-contain rounded-none border border-border/80 bg-[var(--gs-surface-strong)] touch-pan-y [scrollbar-gutter:stable] [-webkit-overflow-scrolling:touch] sm:rounded-[2rem] lg:overflow-hidden lg:grid-cols-[minmax(0,0.84fr)_minmax(0,1.16fr)]"
+    >
       {showIntro ? (
         <div className="hidden min-h-0 border-r border-border/70 bg-[linear-gradient(180deg,rgba(255,255,255,0.58),rgba(255,252,248,0.28))] lg:flex">
           <EstimatorIntroPanel />
@@ -494,11 +497,18 @@ function EstimatorWizard() {
 
         <ProgressBar currentStep={state.currentStep} currentTitle={currentTitle} />
 
-        <div className="flex min-h-0 flex-1 flex-col overflow-visible rounded-[2rem] border border-border/80 bg-[var(--gs-surface)] lg:overflow-hidden">
-          <div className="min-h-0 flex-1 overflow-visible p-4 sm:p-5 lg:overflow-y-auto lg:p-6">
+        <div
+          data-estimator-scroll
+          className="flex min-h-0 flex-1 flex-col overflow-visible rounded-[2rem] border border-border/80 bg-[var(--gs-surface)] lg:overflow-hidden"
+        >
+          <div
+            data-estimator-scroll
+            className="min-h-0 flex-1 overflow-visible p-4 sm:p-5 lg:overflow-y-auto lg:p-6"
+          >
             <AnimatePresence initial={false} mode="wait" custom={state.direction}>
               <motion.div
                 key={isResultsStep ? "results" : state.currentStep}
+                data-estimator-step
                 custom={state.direction}
                 className="min-h-full"
                 initial={{
@@ -563,6 +573,7 @@ interface EstimatorIntroPanelProps {
 function EstimatorIntroPanel({ compact = false }: EstimatorIntroPanelProps) {
   return (
     <div
+      data-estimator-scroll
       className={cn(
         "flex min-h-0 flex-col justify-between gap-8 overflow-y-auto",
         compact ? "rounded-[1.8rem] border border-border/70 bg-white/58 p-5" : "p-8 xl:p-10"

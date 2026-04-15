@@ -50,7 +50,7 @@ If you change application code, run the relevant checks while iterating and run 
 ## Design And Brand Rules
 
 - Use the current Goodspeed light palette and typography:
-- Font: `Bricolage Grotesque`
+- Font: `Geist`
 - Background: `#F9F2ED`
 - Primary text: `#242F28`
 - CTA accent: `#C6DD66`

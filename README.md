@@ -31,7 +31,7 @@ The app owns one primary UI route, `/estimate`, plus one server route, `/api/cla
 
 ## Brand Direction Implemented
 
-- Font: `Bricolage Grotesque`
+- Font: `Geist`
 - Background: warm cream `#F9F2ED`
 - Primary text: deep olive `#242F28`
 - CTA accent: lime `#C6DD66`

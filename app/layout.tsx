@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { Bricolage_Grotesque, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
 
 import "./globals.css";
 
-const bricolageGrotesque = Bricolage_Grotesque({
+const geist = Geist({
   subsets: ["latin"],
-  variable: "--font-bricolage",
+  variable: "--font-geist",
   display: "swap",
 });
 
@@ -46,7 +46,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${bricolageGrotesque.variable} ${geistMono.variable} h-full scroll-smooth antialiased`}
+      className={`${geist.variable} ${geistMono.variable} h-full scroll-smooth antialiased`}
     >
       <body className="flex min-h-full flex-col">{children}</body>
     </html>

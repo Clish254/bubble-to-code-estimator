@@ -81,8 +81,8 @@
   --sidebar-accent-foreground: #242f28;
   --sidebar-border: rgba(85, 98, 89, 0.18);
   --sidebar-ring: rgba(114, 131, 120, 0.45);
-  --gs-surface: rgba(255, 252, 248, 0.78);
-  --gs-surface-strong: rgba(255, 252, 248, 0.94);
+  --gs-surface: #fffcf8;
+  --gs-surface-strong: #fffcf8;
   --gs-shadow: rgba(36, 47, 40, 0.09);
   --gs-deep: #36493c;
   --gs-deeper: #2d3d32;
@@ -139,11 +139,8 @@
   }
 
   body {
-    @apply bg-background text-foreground;
-    background-image:
-      radial-gradient(circle at top left, rgba(198, 221, 102, 0.12), transparent 24rem),
-      radial-gradient(circle at top right, rgba(54, 73, 60, 0.08), transparent 22rem),
-      linear-gradient(180deg, rgba(255, 255, 255, 0.4), transparent 24rem);
+    @apply text-foreground;
+    background: transparent;
     font-feature-settings: "ss02" 1, "ss03" 1, "rlig" 1, "calt" 1;
     text-rendering: optimizeLegibility;
   }
@@ -194,6 +191,8 @@ html[data-embedded="true"] body {
   height: auto;
   min-height: 0;
   overflow: visible;
+  background: transparent;
+  background-image: none;
 }
 
 html[data-embedded="true"] main[data-estimator-root] {
@@ -201,6 +200,7 @@ html[data-embedded="true"] main[data-estimator-root] {
   min-height: 0;
   overflow: visible;
   align-items: flex-start;
+  background: transparent;
 }
 
 html[data-embedded="true"] main[data-estimator-root] > section {
@@ -214,6 +214,14 @@ html[data-embedded="true"] [data-estimator-scroll] {
   max-height: none;
   overflow: visible;
   overscroll-behavior: auto;
+  /*
+   * Nested scroll containers inside the wizard use `flex-1` so they fill a
+   * viewport-sized parent in standalone mode. When we release the viewport
+   * height in embed mode their parent becomes auto-sized, which collapses
+   * `flex-1` children to 0 and causes content (nav buttons, step body) to
+   * overflow and overlap. Force them to size to content instead.
+   */
+  flex: 0 0 auto;
 }
 
 html[data-embedded="true"] [data-estimator-step] {

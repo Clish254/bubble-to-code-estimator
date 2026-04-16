@@ -478,7 +478,7 @@ function EstimatorWizard() {
       className="surface-panel grid h-full min-h-0 w-full overflow-y-auto overscroll-y-contain rounded-none border border-border/80 bg-[var(--gs-surface-strong)] touch-pan-y [scrollbar-gutter:stable] [-webkit-overflow-scrolling:touch] sm:rounded-[2rem] lg:overflow-hidden lg:grid-cols-[minmax(0,0.84fr)_minmax(0,1.16fr)]"
     >
       {showIntro ? (
-        <div className="hidden min-h-0 border-r border-border/70 bg-[linear-gradient(180deg,rgba(255,255,255,0.58),rgba(255,252,248,0.28))] lg:flex">
+        <div className="hidden min-h-0 border-r border-border/70 bg-[linear-gradient(180deg,#ffffff,#fffcf8)] lg:flex">
           <EstimatorIntroPanel />
         </div>
       ) : null}
@@ -499,11 +499,11 @@ function EstimatorWizard() {
 
         <div
           data-estimator-scroll
-          className="flex min-h-0 flex-1 flex-col overflow-visible rounded-[2rem] border border-border/80 bg-[var(--gs-surface)] lg:overflow-hidden"
+          className="flex min-h-0 shrink-0 flex-col overflow-visible rounded-[2rem] border border-border/80 bg-[var(--gs-surface)] lg:flex-1 lg:overflow-hidden"
         >
           <div
             data-estimator-scroll
-            className="min-h-0 flex-1 overflow-visible p-4 sm:p-5 lg:overflow-y-auto lg:p-6"
+            className="min-h-0 overflow-visible p-4 sm:p-5 lg:flex-1 lg:overflow-y-auto lg:p-6"
           >
             <AnimatePresence initial={false} mode="wait" custom={state.direction}>
               <motion.div

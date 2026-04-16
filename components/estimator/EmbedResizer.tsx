@@ -4,6 +4,28 @@ import { useEffect } from "react";
 
 const MESSAGE_TYPE = "goodspeed-estimator:resize";
 const MIN_REASONABLE_HEIGHT = 200;
+const ESTIMATOR_ROOT_SELECTOR = "main[data-estimator-root]";
+
+function getContentHeight(element: HTMLElement | null) {
+  if (!element) return 0;
+
+  return Math.max(
+    element.scrollHeight,
+    element.offsetHeight,
+    element.getBoundingClientRect().height
+  );
+}
+
+export function measureEmbeddedContentHeight(
+  root: HTMLElement | null,
+  body: HTMLElement | null
+) {
+  // In an iframe, <html> can report the current iframe viewport height rather
+  // than the estimator's actual content height, which prevents shrink-on-resize.
+  return Math.ceil(
+    Math.max(getContentHeight(root), body?.scrollHeight ?? 0, body?.offsetHeight ?? 0)
+  );
+}
 
 /**
  * When the estimator is loaded inside an iframe, relaxes the viewport-height
@@ -27,13 +49,9 @@ export function EmbedResizer() {
     let rafId = 0;
 
     const measure = () => {
+      const root = document.querySelector<HTMLElement>(ESTIMATOR_ROOT_SELECTOR);
       const body = document.body;
-      return Math.max(
-        html.scrollHeight,
-        body?.scrollHeight ?? 0,
-        html.offsetHeight,
-        body?.offsetHeight ?? 0
-      );
+      return measureEmbeddedContentHeight(root, body);
     };
 
     const post = () => {
@@ -54,8 +72,9 @@ export function EmbedResizer() {
     };
 
     const observer = new ResizeObserver(schedule);
-    observer.observe(html);
+    const root = document.querySelector<HTMLElement>(ESTIMATOR_ROOT_SELECTOR);
     if (document.body) observer.observe(document.body);
+    if (root) observer.observe(root);
 
     window.addEventListener("resize", schedule);
     window.addEventListener("load", schedule);

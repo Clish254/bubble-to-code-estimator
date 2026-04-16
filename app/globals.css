@@ -201,6 +201,14 @@ html[data-embedded="true"] main[data-estimator-root] {
   overflow: visible;
   align-items: flex-start;
   background: transparent;
+  /*
+   * Standalone mode uses responsive padding on <main> (sm:py-3, lg:py-8) to
+   * centre the wizard inside the viewport. In embed mode the iframe sizes to
+   * <main>'s offset height, so that padding shows up as empty space above
+   * and below the card — and jumps visibly each time the viewport crosses a
+   * breakpoint. Framer (the host) owns the outer gutter; zero padding here.
+   */
+  padding: 0;
 }
 
 html[data-embedded="true"] main[data-estimator-root] > section {
@@ -222,6 +230,18 @@ html[data-embedded="true"] [data-estimator-scroll] {
    * overflow and overlap. Force them to size to content instead.
    */
   flex: 0 0 auto;
+}
+
+/*
+ * Restore rounded-corner clipping on the outer wizard shell. Standalone
+ * mode relies on `lg:overflow-hidden` to clip the intro column's gradient
+ * background to the shell's rounded border. The generic embed rule above
+ * overrides that to `visible`, which leaves square corners on the left
+ * side of the card. Re-clip just the outer shell — inner scroll containers
+ * stay `visible` so embed height measurement isn't affected.
+ */
+html[data-embedded="true"] main[data-estimator-root] > section > [data-estimator-scroll] {
+  overflow: hidden;
 }
 
 html[data-embedded="true"] [data-estimator-step] {

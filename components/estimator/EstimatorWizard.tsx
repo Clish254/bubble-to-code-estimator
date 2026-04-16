@@ -573,7 +573,6 @@ interface EstimatorIntroPanelProps {
 function EstimatorIntroPanel({ compact = false }: EstimatorIntroPanelProps) {
   return (
     <div
-      data-estimator-scroll
       className={cn(
         "flex min-h-0 flex-col justify-between gap-8 overflow-y-auto",
         compact ? "rounded-[1.8rem] border border-border/70 bg-white/58 p-5" : "p-8 xl:p-10"

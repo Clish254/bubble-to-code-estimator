@@ -273,7 +273,7 @@ export function buildWebsiteEstimateSlackPayload(params: {
     ? estimate.itemizedExtras
         .map((item) => {
           const quantityLabel = item.quantity > 1 ? ` x${item.quantity}` : "";
-          return `• ${item.label}${quantityLabel} — ${formatWebsiteEstimateCurrency(item.amount)}`;
+          return `• ${item.label}${quantityLabel} - ${formatWebsiteEstimateCurrency(item.amount)}`;
         })
         .join("\n")
     : "No extra pages selected.";
@@ -322,7 +322,7 @@ export function buildWebsiteEstimateSlackPayload(params: {
         type: "section",
         text: {
           type: "mrkdwn",
-          text: `*Base package*\n${estimate.basePackageName} — ${formatWebsiteEstimateCurrency(estimate.basePackagePrice)}`,
+          text: `*Base package*\n${estimate.basePackageName} - ${formatWebsiteEstimateCurrency(estimate.basePackagePrice)}`,
         },
       },
       {

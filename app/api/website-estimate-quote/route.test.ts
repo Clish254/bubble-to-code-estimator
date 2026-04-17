@@ -105,10 +105,12 @@ describe("POST /api/website-estimate-quote", () => {
 
     const requestInit = vi.mocked(fetch).mock.calls[0]?.[1];
     const webhookPayload = JSON.parse(String(requestInit?.body));
+    const serializedPayload = JSON.stringify(webhookPayload);
 
     expect(webhookPayload.text).toContain("hello@goodspeed.studio");
     expect(webhookPayload.text).toContain("$18,000");
-    expect(JSON.stringify(webhookPayload.blocks)).toContain("Case study index");
+    expect(serializedPayload).toContain("Case study index");
+    expect(serializedPayload).not.toContain("—");
   });
 
   it("returns 503 when the Slack webhook env var is missing", async () => {

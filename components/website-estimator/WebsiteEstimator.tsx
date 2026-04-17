@@ -222,10 +222,10 @@ function WebsiteEstimateSummary({
 }: WebsiteEstimateSummaryProps) {
   return (
     <Card
-      className="relative overflow-hidden border-white/10 bg-[#182019] p-5 text-[#f2eae4] shadow-[0_30px_80px_-42px_rgba(15,22,17,0.92)] sm:p-6 lg:p-7"
+      className="relative overflow-hidden border-white/10 bg-[#182019] p-5 text-[#f2eae4] shadow-none sm:p-6 lg:p-7"
       style={{
         backgroundColor: "#182019",
-        boxShadow: "0 30px 80px -42px rgba(15,22,17,0.92)",
+        boxShadow: "none",
       }}
     >
       <div className="space-y-6">

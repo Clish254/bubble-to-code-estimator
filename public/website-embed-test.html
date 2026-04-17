@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Website estimator embed harness</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      :root { color-scheme: light; }
+      body {
+        margin: 0;
+        font-family: system-ui, sans-serif;
+        background: #eee8e1;
+        min-height: 200vh; /* so we can scroll the parent */
+      }
+      header, footer { padding: 24px; background: #fff; color: #222; }
+      .wrap { max-width: 1200px; margin: 32px auto; padding: 0 16px; }
+      iframe { width: 100%; border: 0; display: block; background: transparent; }
+      #log { position: fixed; bottom: 8px; left: 8px; right: 8px; max-height: 120px; overflow: auto; font: 11px/1.4 ui-monospace, monospace; background: rgba(0,0,0,0.75); color: #cfe6a2; padding: 8px; border-radius: 6px; z-index: 9999; }
+    </style>
+  </head>
+  <body>
+    <header>Parent page — scroll me. Iframe should size to content and never scroll internally.</header>
+    <div class="wrap">
+      <iframe id="frame" src="/website-estimate" height="1200"></iframe>
+    </div>
+    <footer>Parent bottom. You should reach here by scrolling the window.</footer>
+    <pre id="log"></pre>
+    <script>
+      const log = document.getElementById("log");
+      const frame = document.getElementById("frame");
+      window.addEventListener("message", (event) => {
+        const d = event.data;
+        if (!d || typeof d !== "object") return;
+        if (d.type === "goodspeed-estimator:resize" && typeof d.height === "number") {
+          frame.height = String(d.height);
+          log.textContent = `resize → ${d.height}px @ ${new Date().toLocaleTimeString()}\n` + log.textContent;
+        }
+      });
+    </script>
+  </body>
+</html>

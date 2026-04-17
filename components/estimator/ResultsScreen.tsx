@@ -39,7 +39,8 @@ function ResultsScreen({ estimate, onRecalculate }: ResultsScreenProps) {
                 Estimated price
               </p>
               <h2 className="text-balance text-4xl leading-[0.95] font-semibold tracking-[-0.05em] sm:text-5xl lg:text-6xl">
-                {formatCurrency(estimate.costLow)} – {formatCurrency(estimate.costHigh)}
+                {formatCurrency(estimate.costLow)} –{" "}
+                {formatCurrency(estimate.costHigh)}
               </h2>
             </div>
             <div className="space-y-2">
@@ -63,7 +64,12 @@ function ResultsScreen({ estimate, onRecalculate }: ResultsScreenProps) {
               </span>
             </a>
 
-            <Button type="button" variant="outline" className="w-full" onClick={onRecalculate}>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={onRecalculate}
+            >
               Recalculate
             </Button>
 
@@ -91,7 +97,10 @@ function ResultsScreen({ estimate, onRecalculate }: ResultsScreenProps) {
           <CollapsibleTrigger className="inline-flex items-center gap-2 rounded-full border border-border/80 bg-white px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-secondary/65">
             {isBreakdownOpen ? "Hide details" : "Show details"}
             <ChevronDown
-              className={cn("size-4 transition-transform", isBreakdownOpen && "rotate-180")}
+              className={cn(
+                "size-4 transition-transform",
+                isBreakdownOpen && "rotate-180",
+              )}
             />
           </CollapsibleTrigger>
         </div>
@@ -108,16 +117,22 @@ function ResultsScreen({ estimate, onRecalculate }: ResultsScreenProps) {
                 </p>
               </div>
               <p className="mt-3 text-sm leading-6 text-muted-foreground">
-                About {weeksToDays(estimate.totalWeeks)} working days in total, including a short planning phase before we start building.
+                About {weeksToDays(estimate.totalWeeks)} working days in total,
+                including a short planning phase before we start building.
               </p>
             </Card>
 
             <div className="grid gap-4 lg:grid-cols-2">
               {estimate.breakdown.map((group) => (
-                <Card key={group.title} className="h-full border-border/75 bg-white/75 p-4">
+                <Card
+                  key={group.title}
+                  className="h-full border-border/75 bg-white/75 p-4"
+                >
                   <div className="space-y-4">
                     <div className="space-y-1">
-                      <p className="text-base font-semibold tracking-[-0.02em]">{group.title}</p>
+                      <p className="text-base font-semibold tracking-[-0.02em]">
+                        {group.title}
+                      </p>
                       {group.subtotalLabel && group.subtotalValue ? (
                         <p className="text-sm leading-6 text-muted-foreground">
                           {group.subtotalLabel}:{" "}
@@ -133,11 +148,13 @@ function ResultsScreen({ estimate, onRecalculate }: ResultsScreenProps) {
                           key={`${group.title}-${item.label}`}
                           className="flex items-start justify-between gap-4 text-sm leading-6"
                         >
-                          <span className="text-muted-foreground">{item.label}</span>
+                          <span className="text-muted-foreground">
+                            {item.label}
+                          </span>
                           <span
                             className={cn(
                               "text-right font-medium text-foreground",
-                              item.emphasis && "text-[var(--gs-deep)]"
+                              item.emphasis && "text-[var(--gs-deep)]",
                             )}
                           >
                             {item.value}

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
+import { Toaster } from "@/components/ui/sonner";
+
 import "./globals.css";
 
 const geist = Geist({
@@ -17,24 +19,24 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL("https://goodspeed.studio"),
   title: {
-    default: "Goodspeed Bubble-to-Code Estimator",
+    default: "Goodspeed Estimators",
     template: "%s | Goodspeed",
   },
   description:
-    "Estimate the likely cost and timeline to rebuild a Bubble app in code with Goodspeed Studio.",
+    "Interactive Goodspeed estimators for Bubble-to-code rebuilds and fixed-price website scopes.",
   openGraph: {
-    title: "Goodspeed Bubble-to-Code Estimator",
+    title: "Goodspeed Estimators",
     description:
-      "A lead-gen estimator for founders and teams planning a Bubble-to-code rebuild.",
+      "Lead-gen estimators for founders and teams planning a Bubble rebuild or a new website scope.",
     type: "website",
-    url: "https://goodspeed.studio/estimate",
+    url: "https://goodspeed.studio",
     siteName: "Goodspeed",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Goodspeed Bubble-to-Code Estimator",
+    title: "Goodspeed Estimators",
     description:
-      "Estimate the likely cost and timeline to rebuild a Bubble app in code with Goodspeed Studio.",
+      "Estimate the likely scope for a Bubble rebuild or a new website with Goodspeed Studio.",
   },
 };
 
@@ -48,7 +50,10 @@ export default function RootLayout({
       lang="en"
       className={`${geist.variable} ${geistMono.variable} h-full scroll-smooth antialiased`}
     >
-      <body className="flex min-h-full flex-col">{children}</body>
+      <body className="flex min-h-full flex-col">
+        {children}
+        <Toaster />
+      </body>
     </html>
   );
 }

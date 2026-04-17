@@ -1,22 +1,27 @@
-# Goodspeed Bubble-to-Code Estimator
+# Goodspeed Estimators
 
-A Next.js 16 App Router microsurface for Goodspeed Studio's Bubble-to-code lead-generation flow.
+A Next.js 16 App Router microsurface for Goodspeed Studio's estimator-led lead-generation flows.
 
-The app owns one primary UI route, `/estimate`, plus one server route, `/api/classify-integrations`. In production, all other unmatched routes are expected to fall through to a Framer origin via a fallback rewrite.
+The app owns two primary UI routes, `/estimate` and `/website-estimate`, plus the supporting API routes needed for AI-assisted classification and website quote delivery. In production, all other unmatched routes are expected to fall through to a Framer origin via a fallback rewrite.
 
 ## Current State
 
-- The estimator is implemented as a single client wizard inside a server-rendered page.
+- The Bubble estimator is implemented as a single client wizard inside a server-rendered page.
+- The website estimator is implemented as a live client configurator inside a server-rendered page.
 - The UI matches the current live Goodspeed light-brand direction, not the earlier dark-theme brief.
 - The calculator is deterministic except for integration classification, which is AI-assisted.
 - The integration classifier uses the OpenAI Node SDK with `gpt-4o-mini`, simple in-memory rate limiting, and medium-complexity fallbacks when AI is unavailable.
+- The website quote flow is deterministic and posts quote requests to Slack via a server-side webhook endpoint.
 - The starter `app/page.tsx` has been removed intentionally so the gateway pattern can work cleanly.
 - The project currently verifies cleanly with `npm test`, `npm run lint`, `npm run typecheck`, and `npm run build`.
 
 ## Routes
 
-- `/estimate`: the 10-step Goodspeed estimator experience.
+- `/estimate`: the 10-step Bubble-to-code estimator experience.
+- `/website-estimate`: the live website pricing configurator with quote capture.
 - `/api/classify-integrations`: POST endpoint for AI-powered integration classification.
+- `/api/classify-features`: POST endpoint for AI-powered feature baseline sizing.
+- `/api/website-estimate-quote`: POST endpoint that validates a website estimate request and forwards it to Slack.
 
 ## Tech Stack
 
@@ -27,6 +32,7 @@ The app owns one primary UI route, `/estimate`, plus one server route, `/api/cla
 - shadcn primitives, wrapped in Goodspeed-specific UI components
 - `motion` for transitions and micro-interactions
 - `openai` for integration classification
+- `sonner` for inline success and error toasts
 - Vitest and Testing Library for unit and UI tests
 
 ## Brand Direction Implemented
@@ -57,7 +63,7 @@ cp .env.example .env.local
 npm run dev
 ```
 
-4. Open [http://localhost:3000/estimate](http://localhost:3000/estimate).
+4. Open [http://localhost:3000/estimate](http://localhost:3000/estimate) or [http://localhost:3000/website-estimate](http://localhost:3000/website-estimate).
 
 If `OPENAI_API_KEY` is missing, the estimator still works. The integration step will fall back to medium-complexity defaults instead of blocking the flow.
 
@@ -77,9 +83,12 @@ Create `.env.local` from `.env.example`:
 
 ```bash
 OPENAI_API_KEY=sk-your-key-here
+WEBSITE_ESTIMATE_SLACK_WEBHOOK_URL=https://hooks.slack.com/services/your/webhook/url
 ```
 
 ## Estimator Flow
+
+### Bubble estimator
 
 The wizard collects:
 
@@ -101,6 +110,17 @@ The results screen shows:
 - Recommended Goodspeed tier
 - Expandable breakdown summary
 - Primary CTA to [Goodspeed contact](https://goodspeed.studio/contact)
+
+### Website estimator
+
+The configurator shows:
+
+- A fixed Framer website package starting at `$15,000`
+- Included deliverables for the base package
+- Extra page counters at `$1,000` each
+- Optional index-page toggles at `$1,000` each
+- A live-updating `Book a Call` CTA
+- An inline `Get your quote` flow that captures email and forwards the estimate to Slack
 
 ## Calculation Notes
 
@@ -140,13 +160,28 @@ That currently resolves to:
 
 Prices and timelines are stored in hours and dollars internally and converted to days/months and rounded-up currency at the display layer only.
 
+The current tested website-estimator scenario is:
+
+- 2 additional feature pages
+- 1 additional integration page
+- 1 other page
+- 1 case study index page
+
+That currently resolves to:
+
+- `$19,000` total
+- 4 itemized extras in the quote payload and UI summary
+
 ## Testing
 
 Current automated coverage includes:
 
 - Calculator unit tests in `lib/calculator.test.ts`
+- Website pricing unit tests in `lib/website-estimator.test.ts`
 - API route tests in `app/api/classify-integrations/route.test.ts` and `app/api/classify-features/route.test.ts`
+- Website quote API tests in `app/api/website-estimate-quote/route.test.ts`
 - Wizard interaction tests in `components/estimator/EstimatorWizard.test.tsx`
+- Website configurator interaction tests in `components/website-estimator/WebsiteEstimator.test.tsx`
 
 Run the full verification pass with:
 
@@ -173,12 +208,16 @@ const FRAMER_FALLBACK_ORIGIN = "https://your-goodspeed-origin.framer.app";
 
 ```text
 app/
+  api/classify-features/route.ts
   api/classify-integrations/route.ts
+  api/website-estimate-quote/route.ts
   estimate/page.tsx
+  website-estimate/page.tsx
   globals.css
   layout.tsx
 components/
   estimator/
+  website-estimator/
   ui/
 lib/
   calculator.ts
@@ -186,11 +225,13 @@ lib/
   integrations.ts
   rate-limit.ts
   types.ts
+  website-estimator.ts
 ```
 
 ## Important Implementation Details
 
-- The estimator intentionally lives only at `/estimate`.
-- There is no database, auth, payment flow, analytics pipeline, or email capture in this repo.
-- Integration classification is the only server-assisted step.
-- The rest of the estimate is pure client-side math derived from normalized answers.
+- The app intentionally owns `/estimate` and `/website-estimate`.
+- There is no database, auth, payment flow, or analytics pipeline in this repo.
+- Bubble feature and integration classification plus website quote delivery are the only server-assisted steps.
+- The Bubble estimator is otherwise pure client-side math derived from normalized answers.
+- The website estimator recomputes the price server-side before the Slack webhook is sent.

@@ -12,8 +12,8 @@ function StepDesigns({ value, onChange }: StepDesignsProps) {
   return (
     <StepShell
       eyebrow="Step 7"
-      title="Do you already have designs?"
-      description="Figma, Sketch, or anything our team can build from."
+      title="Do you have Figma designs ready?"
+      description="Building from Figma is faster than relying solely on your Bubble app, especially if you're making changes."
     >
       <RadioGroup
         value={value ?? ""}
@@ -22,20 +22,20 @@ function StepDesigns({ value, onChange }: StepDesignsProps) {
       >
         <RadioOption
           value="ready"
-          title="Yes, designs are ready"
-          description="A complete set our team can build straight from."
+          title="Yes, fully designed in Figma"
+          description="A complete set of screens we can build straight from."
           checked={value === "ready"}
         />
         <RadioOption
           value="partial"
-          title="Some are done, some aren't"
-          description="A few key screens exist, but the rest still need design work."
+          title="Some screens are in Figma"
+          description="Key pages are designed, but others still need work."
           checked={value === "partial"}
         />
         <RadioOption
           value="none"
-          title="Not yet"
-          description="No designs yet. We'll build them before the rebuild starts."
+          title="No Figma designs yet"
+          description="We'll design them before starting the code rebuild."
           checked={value === "none"}
         />
       </RadioGroup>

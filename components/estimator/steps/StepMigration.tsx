@@ -65,7 +65,7 @@ function StepMigration({
 
       <Card
         eyebrow="Cleanup"
-        title="Does your current app need cleanup work?"
+        title="Does the app's logic need a rework?"
       >
         <RadioGroup
           value={techDebt ?? ""}
@@ -74,20 +74,20 @@ function StepMigration({
         >
           <RadioOption
             value="none"
-            title="No, it's in good shape"
-            description="We can rebuild what's there without rethinking anything."
+            title="No, keep it as-is"
+            description="The current logic works well. Rebuild it exactly as it functions now."
             checked={techDebt === "none"}
           />
           <RadioOption
             value="some"
-            title="A few things could be better"
-            description="Some workflows or patterns could use a tidy-up along the way."
+            title="Some logic needs improving"
+            description="Certain workflows or rules need a tidy-up along the way."
             checked={techDebt === "some"}
           />
           <RadioOption
             value="major"
-            title="It needs real rework"
-            description="Big parts of it should be rethought before we rebuild."
+            title="Yes, a full rework"
+            description="Major parts of how the app works behind the scenes should be rethought."
             checked={techDebt === "major"}
           />
         </RadioGroup>

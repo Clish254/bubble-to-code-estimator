@@ -257,8 +257,8 @@ describe("EstimatorWizard", () => {
     await user.click(getActionButton("Next"));
 
     // Step 7: designs
-    await screen.findByRole("heading", { name: /Do you already have designs/i });
-    await user.click(screen.getByRole("radio", { name: /^Some are done/i }));
+    await screen.findByRole("heading", { name: /Do you have Figma designs ready/i });
+    await user.click(screen.getByRole("radio", { name: /^Some screens are in Figma/i }));
     await user.click(getActionButton("Next"));
 
     // Admin step (index 7) should be skipped — we jump straight to migration (index 8).
@@ -319,8 +319,8 @@ async function completeGoldenFlow(user: ReturnType<typeof userEvent.setup>) {
   await user.click(screen.getByRole("radio", { name: /^Desktop and mobile/i }));
   await user.click(getActionButton("Next"));
 
-  await screen.findByRole("heading", { name: /Do you already have designs/i });
-  await user.click(screen.getByRole("radio", { name: /^Some are done/i }));
+  await screen.findByRole("heading", { name: /Do you have Figma designs ready/i });
+  await user.click(screen.getByRole("radio", { name: /^Some screens are in Figma/i }));
   await user.click(getActionButton("Next"));
 
   await screen.findByRole("heading", { name: /Do you need an admin dashboard/i });
@@ -331,7 +331,7 @@ async function completeGoldenFlow(user: ReturnType<typeof userEvent.setup>) {
     name: /Tell us about your data/i,
   });
   await user.click(screen.getByRole("radio", { name: /^No, we're starting fresh/i }));
-  await user.click(screen.getByRole("radio", { name: /^No, it's in good shape/i }));
+  await user.click(screen.getByRole("radio", { name: /^No, keep it as-is/i }));
   await user.click(
     screen.getByRole("radio", { name: /^Somewhat documented/i })
   );

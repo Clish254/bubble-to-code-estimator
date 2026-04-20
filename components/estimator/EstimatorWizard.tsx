@@ -527,7 +527,11 @@ function EstimatorWizard() {
                 }}
               >
                 {isResultsStep && estimate ? (
-                  <ResultsScreen estimate={estimate} onRecalculate={handleRecalculate} />
+                  <ResultsScreen
+                    estimate={estimate}
+                    answers={state.answers}
+                    onRecalculate={handleRecalculate}
+                  />
                 ) : (
                   renderStep(state, dispatch)
                 )}

@@ -16,19 +16,20 @@ import type {
 export const TOTAL_STEPS = 9;
 export const RESULT_STEP_INDEX = TOTAL_STEPS;
 
-export const HOURLY_RATE = 80;
+export const HOURLY_RATE = 50;
+export const MINIMUM_ESTIMATE = 10000;
 export const BUFFER_MULTIPLIER = 0.2;
 export const PRODUCTIVE_HOURS_PER_WEEK = 32;
 export const DISCOVERY_WEEKS = 2;
-export const LOW_RANGE_MULTIPLIER = 0.85;
-export const HIGH_RANGE_MULTIPLIER = 1.2;
+export const LOW_RANGE_MULTIPLIER = 0.65;
+export const HIGH_RANGE_MULTIPLIER = 1.1;
 export const WEEKS_PER_MONTH = 4.33;
 
 export const TIER_THRESHOLDS: Record<EstimateTier, [number, number]> = {
-  Starter: [0, 14399.99],
-  Growth: [14400, 36000],
-  Scale: [36000, 64000],
-  Enterprise: [64000.01, Number.POSITIVE_INFINITY],
+  Starter: [0, 9999.99],
+  Growth: [10000, 24999.99],
+  Scale: [25000, 49999.99],
+  Enterprise: [50000, Number.POSITIVE_INFINITY],
 };
 
 export const TIER_DESCRIPTIONS: Record<EstimateTier, string> = {

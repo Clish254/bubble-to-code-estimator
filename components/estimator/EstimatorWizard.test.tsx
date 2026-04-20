@@ -136,6 +136,63 @@ describe("EstimatorWizard", () => {
     expect(integrationsInput).toHaveFocus();
   });
 
+  it("scrolls to the top and posts to the parent on step change", async () => {
+    const user = userEvent.setup();
+    const scrollSpy = vi.fn();
+    Object.defineProperty(HTMLElement.prototype, "scrollTo", {
+      configurable: true,
+      writable: true,
+      value: scrollSpy,
+    });
+    Object.defineProperty(HTMLElement.prototype, "scrollTop", {
+      configurable: true,
+      get: () => 120,
+      set: () => undefined,
+    });
+
+    const originalParent = window.parent;
+    const parentPostMessage = vi.fn();
+    Object.defineProperty(window, "parent", {
+      configurable: true,
+      value: { postMessage: parentPostMessage },
+    });
+    const selfDescriptor = Object.getOwnPropertyDescriptor(window, "self");
+    Object.defineProperty(window, "self", {
+      configurable: true,
+      value: {},
+    });
+
+    try {
+      render(<EstimatorWizard />);
+
+      await screen.findByRole("heading", { name: /How big is your app/i });
+      await user.click(screen.getByRole("radio", { name: /^Medium/i }));
+      await user.click(getActionButton("Next"));
+
+      await screen.findByRole("heading", { name: /How many types of users/i });
+
+      expect(scrollSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ top: 0 })
+      );
+      expect(parentPostMessage).toHaveBeenCalledWith(
+        { type: "goodspeed-estimator:scroll-to-top" },
+        "*"
+      );
+    } finally {
+      Object.defineProperty(window, "parent", {
+        configurable: true,
+        value: originalParent,
+      });
+      if (selfDescriptor) {
+        Object.defineProperty(window, "self", selfDescriptor);
+      }
+      delete (HTMLElement.prototype as unknown as { scrollTo?: unknown })
+        .scrollTo;
+      delete (HTMLElement.prototype as unknown as { scrollTop?: unknown })
+        .scrollTop;
+    }
+  });
+
   it("completes the golden path and renders the final estimate", async () => {
     const user = userEvent.setup();
 

@@ -10,6 +10,7 @@ import {
 } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 
+import { SCROLL_TO_TOP_MESSAGE_TYPE } from "@/components/estimator/EmbedResizer";
 import { ProgressBar } from "@/components/estimator/ProgressBar";
 import { ResultsScreen } from "@/components/estimator/ResultsScreen";
 import { StepAdmin } from "@/components/estimator/steps/StepAdmin";
@@ -279,6 +280,7 @@ function EstimatorWizard() {
   const deferredAnswers = useDeferredValue(state.answers);
   const reducedMotion = useReducedMotion();
   const lastAutoSkipKey = useRef<string | null>(null);
+  const hasMountedRef = useRef(false);
 
   const estimate = isEstimateReady(deferredAnswers)
     ? calculateEstimate(normalizeEstimateInput(deferredAnswers))
@@ -314,6 +316,25 @@ function EstimatorWizard() {
   );
   const canGoBack = state.currentStep > 0 && !isResultsStep;
   const canUsePrimary = getPrimaryActionEnabled(state);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!hasMountedRef.current) {
+      hasMountedRef.current = true;
+      return;
+    }
+
+    const behavior: ScrollBehavior = reducedMotion ? "auto" : "smooth";
+    document
+      .querySelectorAll<HTMLElement>("[data-estimator-scroll]")
+      .forEach((el) => {
+        if (el.scrollTop > 0) el.scrollTo({ top: 0, behavior });
+      });
+
+    if (window.self !== window.top) {
+      window.parent.postMessage({ type: SCROLL_TO_TOP_MESSAGE_TYPE }, "*");
+    }
+  }, [state.currentStep, reducedMotion]);
 
   useEffect(() => {
     if (isResultsStep) {

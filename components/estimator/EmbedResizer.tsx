@@ -2,7 +2,8 @@
 
 import { useEffect } from "react";
 
-const MESSAGE_TYPE = "goodspeed-estimator:resize";
+export const RESIZE_MESSAGE_TYPE = "goodspeed-estimator:resize";
+export const SCROLL_TO_TOP_MESSAGE_TYPE = "goodspeed-estimator:scroll-to-top";
 const MIN_REASONABLE_HEIGHT = 200;
 const ESTIMATOR_ROOT_SELECTOR = "main[data-estimator-root]";
 
@@ -34,8 +35,10 @@ export function measureEmbeddedContentHeight(
  * can resize to fit its content. This prevents the scroll-trap that happens
  * when an embed has its own internal scroll container.
  *
- * The outbound message shape is:
+ * The outbound message shapes are:
  *   { type: "goodspeed-estimator:resize", height: number }
+ *   { type: "goodspeed-estimator:scroll-to-top" } (posted from EstimatorWizard
+ *     on step change so the host Framer page can scroll the iframe into view)
  */
 export function EmbedResizer() {
   useEffect(() => {
@@ -63,7 +66,7 @@ export function EmbedResizer() {
       if (height < MIN_REASONABLE_HEIGHT) return;
       if (height === lastPostedHeight) return;
       lastPostedHeight = height;
-      window.parent.postMessage({ type: MESSAGE_TYPE, height }, "*");
+      window.parent.postMessage({ type: RESIZE_MESSAGE_TYPE, height }, "*");
     };
 
     const schedule = () => {

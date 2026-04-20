@@ -35,6 +35,10 @@
           frame.height = String(d.height);
           log.textContent = `resize → ${d.height}px @ ${new Date().toLocaleTimeString()}\n` + log.textContent;
         }
+        if (d.type === "goodspeed-estimator:scroll-to-top") {
+          frame.scrollIntoView({ block: "start", behavior: "smooth" });
+          log.textContent = `scroll-to-top @ ${new Date().toLocaleTimeString()}\n` + log.textContent;
+        }
       });
     </script>
   </body>

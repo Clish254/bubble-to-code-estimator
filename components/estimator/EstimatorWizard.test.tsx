@@ -335,9 +335,6 @@ async function completeGoldenFlow(user: ReturnType<typeof userEvent.setup>) {
   await user.click(
     screen.getByRole("radio", { name: /^Somewhat documented/i })
   );
-  await user.click(getActionButton("Next"));
-
-  await screen.findByRole("heading", { name: /Anything else to include/i });
   await user.click(getActionButton("Get Estimate"));
 
   await waitFor(() =>

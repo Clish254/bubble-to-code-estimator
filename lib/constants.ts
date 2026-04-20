@@ -13,7 +13,7 @@ import type {
   UserRolesOption,
 } from "@/lib/types";
 
-export const TOTAL_STEPS = 10;
+export const TOTAL_STEPS = 9;
 export const RESULT_STEP_INDEX = TOTAL_STEPS;
 
 export const HOURLY_RATE = 80;
@@ -49,7 +49,6 @@ export const STEP_TITLES = [
   "Designs",
   "Admin",
   "Data and docs",
-  "Extras",
 ] as const;
 
 export const APP_SIZE_HOURS: Record<AppSizeOption, number> = {

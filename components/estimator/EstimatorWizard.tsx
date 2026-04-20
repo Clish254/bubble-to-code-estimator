@@ -15,7 +15,6 @@ import { ResultsScreen } from "@/components/estimator/ResultsScreen";
 import { StepAdmin } from "@/components/estimator/steps/StepAdmin";
 import { StepAppSize } from "@/components/estimator/steps/StepAppSize";
 import { StepDesigns } from "@/components/estimator/steps/StepDesigns";
-import { StepExtras } from "@/components/estimator/steps/StepExtras";
 import { StepFeatures } from "@/components/estimator/steps/StepFeatures";
 import { StepIntegrations } from "@/components/estimator/steps/StepIntegrations";
 import { StepMigration } from "@/components/estimator/steps/StepMigration";
@@ -609,7 +608,7 @@ function EstimatorIntroPanel({ compact = false }: EstimatorIntroPanelProps) {
       <div className="grid grid-cols-1 gap-4">
         <EstimatorIntroStat
           value="A few minutes"
-          description="Ten quick questions. No sign-up, no sales call first."
+          description="Nine quick questions. No sign-up, no sales call first."
         />
         <EstimatorIntroStat
           value="A real range"
@@ -740,31 +739,6 @@ function renderStep(
           }
         />
       );
-    case 9:
-      return (
-        <StepExtras
-          includeDesignPhase={state.answers.includeDesignPhase}
-          includeProjectManagement={state.answers.includeProjectManagement}
-          qaLevel={state.answers.qaLevel}
-          onDesignPhaseChange={(checked) =>
-            dispatch({
-              type: "set-answer",
-              key: "includeDesignPhase",
-              value: checked,
-            })
-          }
-          onProjectManagementChange={(checked) =>
-            dispatch({
-              type: "set-answer",
-              key: "includeProjectManagement",
-              value: checked,
-            })
-          }
-          onQaLevelChange={(value) =>
-            dispatch({ type: "set-answer", key: "qaLevel", value })
-          }
-        />
-      );
     default:
       return null;
   }
@@ -824,8 +798,6 @@ function getPrimaryActionEnabled(state: EstimatorState) {
           state.answers.techDebt &&
           state.answers.documentation
       );
-    case 9:
-      return true;
     default:
       return false;
   }

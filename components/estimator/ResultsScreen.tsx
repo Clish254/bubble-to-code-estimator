@@ -203,19 +203,19 @@ function buildSavingsTips(answers: EstimatorAnswers): string[] {
   const tips: string[] = [];
 
   if (answers.existingDesigns === "none" || answers.existingDesigns === "partial") {
-    tips.push("Bring finished designs — save ~10–15%");
+    tips.push("Bring finished designs - save ~10–15%");
   }
 
   if (answers.dataMigration && answers.dataMigration !== "none") {
-    tips.push("Skip or simplify migration — save ~$2–5k");
+    tips.push("Skip or simplify migration - save ~$2–5k");
   }
 
   if (answers.techDebt === "major") {
-    tips.push("Handle cleanup in-house — save ~$3k");
+    tips.push("Handle cleanup in-house - save ~$3k");
   }
 
   if (answers.qaLevel === "full") {
-    tips.push("Start with basic QA — save ~10%");
+    tips.push("Start with basic QA - save ~10%");
   }
 
   if (answers.uiQuality === "premium") {

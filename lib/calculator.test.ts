@@ -40,13 +40,19 @@ describe("calculateEstimate", () => {
     const result = calculateEstimate(normalizeEstimateInput(createBaseAnswers()));
 
     expect(result.directHours).toBe(362);
-    expect(result.costMid).toBe(34752);
-    expect(result.costLow).toBe(29539.2);
-    expect(result.costHigh).toBe(41702.4);
+    expect(result.costMid).toBeCloseTo(21720, 5);
+    expect(result.costLow).toBeCloseTo(14118, 5);
+    expect(result.costHigh).toBeCloseTo(23892, 5);
     expect(result.totalWeeks).toBe(15.575);
-    expect(result.monthsLow).toBeCloseTo(3.05745, 4);
-    expect(result.monthsHigh).toBeCloseTo(4.31640, 4);
+    expect(result.monthsLow).toBeCloseTo(2.3381, 3);
+    expect(result.monthsHigh).toBeCloseTo(3.9567, 3);
     expect(result.tier).toBe("Growth");
+    expect(result.breakdown).toHaveLength(3);
+    expect(result.breakdown.map((group) => group.title)).toEqual([
+      "The basics",
+      "Features and integrations",
+      "Design, admin, and data work",
+    ]);
   });
 
   it("stacks no-design lift and formal design phase hours", () => {
@@ -81,7 +87,37 @@ describe("calculateEstimate", () => {
     expect(fullQa.costMid).toBeGreaterThan(basicQa.costMid);
   });
 
-  it("maps smaller scopes into Starter and large scopes into Enterprise", () => {
+  it("applies the $10k floor for minimal-scope estimates", () => {
+    const result = calculateEstimate(
+      normalizeEstimateInput({
+        ...createBaseAnswers(),
+        appSize: "mvp",
+        userRoles: "one",
+        rebuildType: "sameUx",
+        simpleFeatureCount: 0,
+        mediumFeatureCount: 0,
+        complexFeatureCount: 0,
+        integrationsText: "",
+        integrationClassifications: [],
+        uiQuality: "basic",
+        deviceSupport: "desktop",
+        existingDesigns: "ready",
+        adminDashboard: "none",
+        dataMigration: "none",
+        techDebt: "none",
+        documentation: "good",
+        includeDesignPhase: false,
+        includeProjectManagement: false,
+        qaLevel: "none",
+      })
+    );
+
+    expect(result.costLow).toBe(10000);
+    expect(result.costHigh).toBe(12500);
+    expect(result.costMid).toBe(11250);
+  });
+
+  it("maps smaller scopes into Growth (via floor) and large scopes into Enterprise", () => {
     const starter = calculateEstimate(
       normalizeEstimateInput({
         ...createBaseAnswers(),
@@ -144,7 +180,7 @@ describe("calculateEstimate", () => {
       })
     );
 
-    expect(starter.tier).toBe("Starter");
+    expect(starter.tier).toBe("Growth");
     expect(enterprise.tier).toBe("Enterprise");
   });
 });

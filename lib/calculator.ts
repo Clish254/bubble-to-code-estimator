@@ -14,6 +14,7 @@ import {
   HIGH_RANGE_MULTIPLIER,
   HOURLY_RATE,
   LOW_RANGE_MULTIPLIER,
+  MINIMUM_ESTIMATE,
   PRODUCTIVE_HOURS_PER_WEEK,
   PROJECT_MANAGEMENT_MULTIPLIER,
   QA_MULTIPLIERS,
@@ -156,14 +157,18 @@ export function calculateEstimate(input: EstimateInput): EstimateResult {
   const baseHours = directHours * combinedMultiplier;
   const bufferHours = baseHours * BUFFER_MULTIPLIER;
   const bufferedHours = baseHours + bufferHours;
-  const costMid = bufferedHours * HOURLY_RATE;
-  const costLow = costMid * LOW_RANGE_MULTIPLIER;
-  const costHigh = costMid * HIGH_RANGE_MULTIPLIER;
+  const rawCostMid = bufferedHours * HOURLY_RATE;
+  const rawCostLow = rawCostMid * LOW_RANGE_MULTIPLIER;
+  const rawCostHigh = rawCostMid * HIGH_RANGE_MULTIPLIER;
+  const floored = rawCostLow < MINIMUM_ESTIMATE;
+  const costLow = floored ? MINIMUM_ESTIMATE : rawCostLow;
+  const costHigh = floored ? MINIMUM_ESTIMATE * 1.25 : rawCostHigh;
+  const costMid = floored ? (costLow + costHigh) / 2 : rawCostMid;
   const devWeeks = bufferedHours / PRODUCTIVE_HOURS_PER_WEEK;
   const totalWeeks = devWeeks + DISCOVERY_WEEKS;
   const monthsLow = (totalWeeks * LOW_RANGE_MULTIPLIER) / WEEKS_PER_MONTH;
   const monthsHigh = (totalWeeks * HIGH_RANGE_MULTIPLIER) / WEEKS_PER_MONTH;
-  const tier = getTier(costMid);
+  const tier = getTier(costLow);
 
   const breakdown: BreakdownGroup[] = [
     {
@@ -250,26 +255,6 @@ export function calculateEstimate(input: EstimateInput): EstimateResult {
         {
           label: "Design phase",
           value: formatDays(designPhaseHours),
-        },
-      ],
-    },
-    {
-      title: "Adjustments and buffer",
-      subtotalLabel: "Days in total",
-      subtotalValue: formatDays(bufferedHours),
-      items: [
-        ...multiplierMap.map(([label, multiplier]) => ({
-          label,
-          value: `×${multiplier.toFixed(2)}`,
-        })),
-        {
-          label: "Combined adjustment",
-          value: `×${combinedMultiplier.toFixed(2)}`,
-          emphasis: true,
-        },
-        {
-          label: "Buffer",
-          value: formatDays(bufferHours),
         },
       ],
     },

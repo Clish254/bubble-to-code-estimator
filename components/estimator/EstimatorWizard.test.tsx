@@ -235,22 +235,22 @@ describe("EstimatorWizard", () => {
 
     await completeGoldenFlow(user);
 
-    // sameUx (×0.8), mid app, twoToThree roles, 3/2/1 features, Stripe low,
+    // sameUx (×0.8), mid app, twoToThree roles, 3/2/1 features, Stripe low 12h,
     // polished + desktopMobile, partial designs, basic admin, no migration,
     // no techDebt, partial docs, no extras.
-    // directHours = 362, combined = 0.8, buffered = 347.52
-    // costMid = $27,801.60 → low $23,631.36, high $33,361.92
-    // Rounded up to $1k: $24,000 – $34,000
-    // totalWeeks = 12.86 → daysLow 44, daysHigh 62 → 3–4 months
-    // Tier: Growth (costMid falls in 14.4k–36k)
+    // directHours = 367, combined = 0.8, buffered = 352.32
+    // costMid = $17,616 → low $11,450.40, high $19,377.60
+    // Rounded up to $1k: $12,000 – $20,000 (headline shows "Starts at $12,000")
+    // totalWeeks = 13.01 → daysLow 45, daysHigh 63 → 3–4 months
+    // Tier: Growth (costLow $11,450 falls in $10k–$24,999.99)
     expect(
-      await screen.findByRole("heading", { name: /\$24,000\s*–\s*\$34,000/i })
+      await screen.findByRole("heading", { name: /Starts at \$12,000/i })
     ).toBeInTheDocument();
+    expect(screen.getByText(/\$12,000\s*–\s*\$20,000/i)).toBeInTheDocument();
     expect(screen.getByText(/3[–-]4 months/i)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /Book a Call/i })).toHaveAttribute(
-      "href",
-      "https://goodspeed.studio/contact"
-    );
+    expect(
+      screen.getByRole("link", { name: /Book a 15 min call/i })
+    ).toHaveAttribute("href", "https://goodspeed.studio/contact");
 
     await user.click(screen.getByRole("button", { name: "Recalculate" }));
 
@@ -396,7 +396,7 @@ async function completeGoldenFlow(user: ReturnType<typeof userEvent.setup>) {
 
   await waitFor(() =>
     expect(
-      screen.getByRole("heading", { name: /\$24,000\s*–\s*\$34,000/i })
+      screen.getByRole("heading", { name: /Starts at \$12,000/i })
     ).toBeInTheDocument()
   );
 }

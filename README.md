@@ -133,6 +133,8 @@ The calculator logic lives in `lib/calculator.ts` and follows the finalized mapp
 - documentation -> multiplier
 - project management and QA -> multipliers
 
+A `$10,000` minimum floor is applied to every estimate. If the computed low end falls below `$10,000`, the low is clamped to `$10,000`, the high is set to `$12,500` (+25%), and the mid becomes the midpoint (`$11,250`). Estimates above the floor are unaffected.
+
 The current tested canonical scenario is:
 
 - Mid-sized app
@@ -152,11 +154,15 @@ The current tested canonical scenario is:
 That currently resolves to:
 
 - `362` direct hours internally
-- `$34,752` mid estimate internally
-- `$30,000 - $42,000` client-facing range (rounded up to nearest $1,000)
+- `$21,720` mid estimate internally
+- `$14,118` low and `$23,892` high internally
+- `$15,000 - $24,000` client-facing range (rounded up to nearest $1,000)
+- Headline reads `Starts at $15,000` with the full range shown as secondary text
 - `15.575` total weeks internally
 - `3 - 4 months` client-facing timeline (adaptive: days under ~1 month, months above)
-- `Growth` tier
+- `Growth` tier (derived from `costLow`)
+
+The client-facing breakdown is simplified to 3 groups — "The basics", "Features and integrations", and "Design, admin, and data work". The adjustments-and-buffer math still flows into the underlying numbers, it is just no longer surfaced as its own group.
 
 Prices and timelines are stored in hours and dollars internally and converted to days/months and rounded-up currency at the display layer only.
 

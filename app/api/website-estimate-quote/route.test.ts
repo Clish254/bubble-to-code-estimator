@@ -110,6 +110,7 @@ describe("POST /api/website-estimate-quote", () => {
     expect(webhookPayload.text).toContain("hello@goodspeed.studio");
     expect(webhookPayload.text).toContain("$18,000");
     expect(serializedPayload).toContain("Case study index");
+    // eslint-disable-next-line no-restricted-syntax
     expect(serializedPayload).not.toContain("—");
   });
 

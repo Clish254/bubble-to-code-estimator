@@ -69,6 +69,7 @@ If you change application code, run the relevant checks while iterating and run 
 - Keep calculation utilities pure and easy to test.
 - Reuse existing typed option unions from `lib/types.ts` instead of introducing parallel string enums.
 - When adding or changing UI controls, extend the wrappers in `components/ui` rather than scattering design logic across steps.
+- Do not use em dashes (—). Always use regular hyphens (-) instead in strings, JSX, and templates. There is an ESLint rule enforcing this.
 
 ## API And Security Notes
 
